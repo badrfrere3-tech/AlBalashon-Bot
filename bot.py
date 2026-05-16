@@ -417,6 +417,7 @@ def main():
             TYPING_INPUT: [MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, process_input)],
         },
         fallbacks=[CommandHandler("start", start)],
+        allow_reentry=True
     )
 
     app.add_handler(conv_handler)
