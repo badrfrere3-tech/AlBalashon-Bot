@@ -54,6 +54,11 @@ EMERGENCY_PHARMACY_INFO = (
     "⏰ *الشيفت مستمر حتى الساعة 3 صباحاً*"
 )
 
+EVENING_AZKAR_TEXT = (
+    "أَعُوذُ بِاللهِ مِنْ الشَّيْطَانِ الرَّجِيمِ\n"
+    "{اللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاء وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالأَرْضَ وَلاَ يَؤُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ}"
+)
+
 DELIVERY_TEXT = "⏳ *هذه الميزة ستتوفر قريباً...*"
 
 STAR_METAL_TEXT = (
@@ -73,7 +78,8 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
         ["🛠️ الخدمات", "🩺 دليل الأطباء والعيادات"],
-        ["➕ أضف عملك", "🛺 اطلب توك توك"]
+        ["➕ أضف عملك", "🛺 اطلب توك توك"],
+        ["🌆 أذكار المساء"]
     ],
     resize_keyboard=True,
 )
@@ -157,6 +163,10 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text(TUKTUK_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
         
+    elif "أذكار المساء" in text:
+        await update.message.reply_text(f"🌆 *أذكار المساء*\n\n{EVENING_AZKAR_TEXT}", parse_mode="Markdown")
+        return ConversationHandler.END
+        
     elif "استار ميتال" in text:
         contact_keyboard = [[InlineKeyboardButton("تواصل عبر واتساب 💬", url="https://wa.me/201014770786")]]
         contact_markup = InlineKeyboardMarkup(contact_keyboard)
@@ -234,7 +244,7 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
              "💼 وظائف خالية", "🛠️ الخدمات", "🩺 دليل الأطباء والعيادات", "🪟 معرض استار ميتال للألوميتال",
              "📦 خدمات الشحن والتوصيل (الطيارين)", "🏠 عقارات وسكن (بيع / إيجار)", "➕ أضف عملك",
              "🛺 اطلب توك توك", "🔙 رجوع للقائمة الرئيسية", 
-             "📦 أبلغ عن مفقود", "🏠 عقارات وسكن", "🚕 مشاركة المشاوير", "🛠 الخدمات"]
+             "📦 أبلغ عن مفقود", "🏠 عقارات وسكن", "🚕 مشاركة المشاوير", "🛠 الخدمات", "🌆 أذكار المساء"]
              
     if user_text in KNOWN:
         context.user_data.clear()
@@ -408,6 +418,10 @@ async def send_daily_azkar(context: ContextTypes.DEFAULT_TYPE):
     try: await context.bot.send_message(CHANNEL_ID, azkar_text, parse_mode="Markdown")
     except Exception: pass
 
+async def send_daily_evening_azkar(context: ContextTypes.DEFAULT_TYPE):
+    try: await context.bot.send_message(CHANNEL_ID, f"🌆 *أذكار المساء*\n\n{EVENING_AZKAR_TEXT}", parse_mode="Markdown")
+    except Exception: pass
+
 # ════════════════════════════════════════════
 #  الإعداد والتشغيل
 # ════════════════════════════════════════════
@@ -417,8 +431,11 @@ def main():
     app = Application.builder().token(BOT_TOKEN).persistence(persistence).build()
     
     tz = datetime.timezone(datetime.timedelta(hours=3))
-    t = datetime.time(hour=6, minute=0, tzinfo=tz)
-    app.job_queue.run_daily(send_daily_azkar, time=t)
+    t_morning = datetime.time(hour=6, minute=0, tzinfo=tz)
+    app.job_queue.run_daily(send_daily_azkar, time=t_morning)
+    
+    t_evening = datetime.time(hour=20, minute=0, tzinfo=tz)
+    app.job_queue.run_daily(send_daily_evening_azkar, time=t_evening)
 
     conv_handler = ConversationHandler(
         entry_points=[
