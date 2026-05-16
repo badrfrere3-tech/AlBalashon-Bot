@@ -72,9 +72,17 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
         ["🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ"],
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
+        ["🛠️ الخدمات"]
+    ],
+    resize_keyboard=True,
+)
+
+SERVICES_KEYBOARD = ReplyKeyboardMarkup(
+    [
+        ["➕ أضف عملك"],
         ["🩺 أطباء", "🛠️ صنايعية", "🏢 معارض ومحلات"],
         ["📦 خدمات الشحن والتوصيل", "🏠 عقارات وسكن"],
-        ["➕ أضف عملك"]
+        ["🔙 رجوع للقائمة الرئيسية"]
     ],
     resize_keyboard=True,
 )
@@ -190,6 +198,10 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     if text == "🔙 رجوع للقائمة الرئيسية":
         await update.message.reply_text("القائمة الرئيسية:", reply_markup=MAIN_KEYBOARD)
+        return ConversationHandler.END
+
+    if text == "🛠️ الخدمات":
+        await update.message.reply_text("اختر الخدمة المطلوبة من القائمة:", reply_markup=SERVICES_KEYBOARD)
         return ConversationHandler.END
 
     # --- القوائم الثابتة الديناميكية ---
@@ -350,7 +362,7 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     KNOWN = ["🚨 إرسال استغاثة / حالة عاجلة", "🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ",
              "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", "🚕 مشاركة المشاوير والمواصلات",
-             "💼 وظائف خالية", "🩺 أطباء", "🛠️ صنايعية", "🏢 معارض ومحلات", "📦 خدمات الشحن والتوصيل",
+             "💼 وظائف خالية", "🛠️ الخدمات", "🩺 أطباء", "🛠️ صنايعية", "🏢 معارض ومحلات", "📦 خدمات الشحن والتوصيل",
              "🏠 عقارات وسكن", "➕ أضف عملك"]
     if user_text in KNOWN:
         context.user_data.clear()
