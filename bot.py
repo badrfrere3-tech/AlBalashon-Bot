@@ -14,7 +14,7 @@ from telegram.ext import (
 # ─── الإعدادات ───────────────────────────────
 BOT_TOKEN  = "8692227293:AAFEqO_5EqAm-jTB7GGnfVMlMh8Ru1iwSeM"
 ADMIN_ID   = 5481609181
-CHANNEL_ID = "@AlBalashon_services_bo"
+CHANNEL_ID = "@AlBalashon_Channel"
 
 # ─── مراحل المحادثة ──────────────────────────
 CHOOSING, TYPING_INPUT = range(2)
@@ -86,7 +86,7 @@ def get_user_count() -> int:
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     register_user(update.effective_user.id)
     await update.message.reply_text(
-        "💡 مرحباً بك في منصة خدمات البلشون الذكية.\nاختر الخدمة المطلوبة من الأزرار بالأسفل:",
+        "💡 مرحباً بك في منصة خدمات البلاشون الذكية.\nاختر الخدمة المطلوبة من الأزرار بالأسفل:",
         reply_markup=MAIN_KEYBOARD,
     )
     return CHOOSING
