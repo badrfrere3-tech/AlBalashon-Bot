@@ -62,6 +62,13 @@ EMERGENCY_PHARMACY_INFO = (
 # Services texts
 DELIVERY_TEXT = "📦 *خدمات الشحن والتوصيل (الطيارين):* (الاسم والرقم)"
 
+STAR_METAL_TEXT = (
+    "🪟 *معرض استار ميتال للألوميتال*\n\n"
+    "🏢 *اسم المعرض:* معرض استار ميتال للألوميتال\n"
+    "👤 *صاحب المعرض:* محمود عبدالعظيم سعد\n"
+    "📞 *رقم التواصل:* 01014770786"
+)
+
 # ─── لوحات المفاتيح ──────────────────────────
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
     [
@@ -76,6 +83,7 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
 
 SERVICES_KEYBOARD = ReplyKeyboardMarkup(
     [
+        ["🪟 معرض استار ميتال للألوميتال"],
         ["📦 خدمات الشحن والتوصيل (الطيارين)"],
         ["🏠 عقارات وسكن (بيع / إيجار)"],
         ["🔙 رجوع للقائمة الرئيسية"]
@@ -163,6 +171,12 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
     # --- القائمة الفرعية (الخدمات - نصوص مباشرة) ---
+    elif text == "🪟 معرض استار ميتال للألوميتال":
+        contact_keyboard = [[InlineKeyboardButton("تواصل عبر واتساب 💬", url="https://wa.me/201014770786")]]
+        contact_markup = InlineKeyboardMarkup(contact_keyboard)
+        await update.message.reply_text(STAR_METAL_TEXT, parse_mode="Markdown", reply_markup=contact_markup)
+        return ConversationHandler.END
+        
     elif text == "📦 خدمات الشحن والتوصيل (الطيارين)":
         await update.message.reply_text(DELIVERY_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
@@ -235,7 +249,7 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         "🚨 إرسال استغاثة / حالة عاجلة", "🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ",
         "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", "🚕 مشاركة المشاوير والمواصلات",
         "💼 وظائف خالية", "🛠️ الخدمات", "🩺 دليل الأطباء والعيادات",
-        "📦 خدمات الشحن والتوصيل (الطيارين)",
+        "🪟 معرض استار ميتال للألوميتال", "📦 خدمات الشحن والتوصيل (الطيارين)",
         "🏠 عقارات وسكن (بيع / إيجار)", "🔙 رجوع للقائمة الرئيسية"
     ]
     if user_text in KNOWN_BUTTONS:
