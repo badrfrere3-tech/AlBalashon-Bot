@@ -54,7 +54,7 @@ EMERGENCY_PHARMACY_INFO = (
     "⏰ *الشيفت مستمر حتى الساعة 3 صباحاً*"
 )
 
-DELIVERY_TEXT = "📦 *خدمات الشحن والتوصيل (الطيارين):* (الاسم والرقم)"
+DELIVERY_TEXT = "⏳ *هذه الميزة ستتوفر قريباً...*"
 
 STAR_METAL_TEXT = (
     "🪟 *معرض استار ميتال للألوميتال*\n\n"
@@ -141,11 +141,11 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     text = update.message.text
     context.user_data["choice"] = text
 
-    if text == "🔙 رجوع للقائمة الرئيسية":
+    if "رجوع" in text:
         await update.message.reply_text("القائمة الرئيسية:", reply_markup=MAIN_KEYBOARD)
         return ConversationHandler.END
 
-    if text == "🛠️ الخدمات":
+    if "الخدمات" in text and not "الشحن" in text:
         await update.message.reply_text("اختر الخدمة المطلوبة من القائمة:", reply_markup=SERVICES_KEYBOARD)
         return ConversationHandler.END
 
@@ -157,23 +157,23 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text(TUKTUK_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
         
-    elif text == "🪟 معرض استار ميتال للألوميتال":
+    elif "استار ميتال" in text:
         contact_keyboard = [[InlineKeyboardButton("تواصل عبر واتساب 💬", url="https://wa.me/201014770786")]]
         contact_markup = InlineKeyboardMarkup(contact_keyboard)
         await update.message.reply_text(STAR_METAL_TEXT, parse_mode="Markdown", reply_markup=contact_markup)
         return ConversationHandler.END
 
-    elif text == "🏥 صيدليات الطوارئ الليلة":
+    elif "طوارئ الليلة" in text or "صيدليات" in text:
         contact_keyboard = [[InlineKeyboardButton("تواصل عبر واتساب 💬", url="https://wa.me/201002707560")]]
         contact_markup = InlineKeyboardMarkup(contact_keyboard)
         await update.message.reply_text(EMERGENCY_PHARMACY_INFO, parse_mode="Markdown", reply_markup=contact_markup)
         return ConversationHandler.END
         
-    elif text == "📦 خدمات الشحن والتوصيل (الطيارين)":
+    elif "الشحن والتوصيل" in text:
         await update.message.reply_text(DELIVERY_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
 
-    elif text == "📢 إعلان منتج / خدماتنا":
+    elif "إعلان منتج" in text:
         keyboard = [[InlineKeyboardButton("تواصل معنا 💬", url="https://wa.me/201020549760")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(
@@ -183,32 +183,32 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
     # --- إضافة عمل ---
-    elif text == "➕ أضف عملك":
+    elif "أضف عملك" in text:
         await update.message.reply_text("الرجاء كتابة بيانات عملك في رسالة واحدة (الاسم، التخصص الدقيق، رقم التليفون، العنوان):")
         return TYPING_INPUT
 
     # --- الردود التي تتطلب إدخال بيانات ---
-    elif text == "🩸 التبرع بالدم والطوارئ":
+    elif "التبرع بالدم" in text:
         await update.message.reply_text("🩸 اكتب تفاصيل الحالة الحرجة فوراً (مثال: الفصيلة، المستشفى، رقم التواصل):")
         return TYPING_INPUT
 
-    elif text == "💼 وظائف خالية":
+    elif "وظائف" in text:
         await update.message.reply_text("💼 اكتب تفاصيل الوظيفة (التخصص، المرتب، رقم التواصل):")
         return TYPING_INPUT
 
-    elif text == "🚨 إرسال استغاثة / حالة عاجلة":
+    elif "استغاثة" in text:
         await update.message.reply_text("🚨 اكتب تفاصيل الاستغاثة ورقم التواصل:")
         return TYPING_INPUT
 
-    elif text == "📦 أبلغ عن مفقود / أمانة":
+    elif "مفقود" in text or "أمانة" in text:
         await update.message.reply_text("📦 اكتب مواصفات الشيء المفقود، ومكان التواجد:")
         return TYPING_INPUT
         
-    elif text == "🚕 مشاركة المشاوير والمواصلات":
+    elif "مشاوير" in text or "مواصلات" in text:
         await update.message.reply_text("🚕 اكتب تفاصيل مشوارك (سواق ولا راكب، والميعاد):")
         return TYPING_INPUT
         
-    elif text == "🏠 عقارات وسكن (بيع / إيجار)":
+    elif "عقارات" in text or "سكن" in text:
         await update.message.reply_text("🏠 اكتب تفاصيل العقار (بيع/إيجار، السعر، والمواصفات):")
         return TYPING_INPUT
 
@@ -233,7 +233,8 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
              "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", "🚕 مشاركة المشاوير والمواصلات",
              "💼 وظائف خالية", "🛠️ الخدمات", "🩺 دليل الأطباء والعيادات", "🪟 معرض استار ميتال للألوميتال",
              "📦 خدمات الشحن والتوصيل (الطيارين)", "🏠 عقارات وسكن (بيع / إيجار)", "➕ أضف عملك",
-             "🛺 اطلب توك توك"]
+             "🛺 اطلب توك توك", "🔙 رجوع للقائمة الرئيسية", 
+             "📦 أبلغ عن مفقود", "🏠 عقارات وسكن", "🚕 مشاركة المشاوير", "🛠 الخدمات"]
              
     if user_text in KNOWN:
         context.user_data.clear()
