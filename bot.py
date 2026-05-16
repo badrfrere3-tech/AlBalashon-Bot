@@ -239,7 +239,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     elif text == "🚨 إرسال استغاثة / حالة عاجلة":
         await update.message.reply_text(
-            "🚨 اكتب تفاصيل الاستغاثة ورقم التواصل وسأرسلها للمشرف فوراً:"
+            "🚨 اكتب تفاصيل الاستغاثة ورقم التواصل وسأرسلها للقناة فوراً:"
         )
         return TYPING_INPUT
 
@@ -280,11 +280,20 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     if await check_and_ban(user_text, update, context):
         return ConversationHandler.END
         
-    # إذا ضغط المستخدم على زر "رجوع" وهو داخل وضع الإدخال (TYPING_INPUT)
-    if user_text == "🔙 رجوع للقائمة الرئيسية":
+    KNOWN_BUTTONS = [
+        "🚨 إرسال استغاثة / حالة عاجلة", "🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ",
+        "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", "🚕 مشاركة المشاوير والمواصلات",
+        "💼 وظائف خالية", "🛠️ الخدمات", "🩺 دليل الأطباء والعيادات", "كهربائي", "سباك", "نجار",
+        "صيانة أجهزة", "👨‍🔧 ميكانيكي وصيانة أعطال", "📦 خدمات الشحن والتوصيل (الطيارين)",
+        "🏠 عقارات وسكن (بيع / إيجار)", "🔙 رجوع للقائمة الرئيسية"
+    ]
+    if user_text in KNOWN_BUTTONS:
         context.user_data.clear()
-        await update.message.reply_text("القائمة الرئيسية:", reply_markup=MAIN_KEYBOARD)
-        return ConversationHandler.END
+        if user_text == "🔙 رجوع للقائمة الرئيسية":
+            await update.message.reply_text("القائمة الرئيسية:", reply_markup=MAIN_KEYBOARD)
+            return ConversationHandler.END
+        else:
+            return await handle_choice(update, context)
 
     choice    = context.user_data.get("choice", "")
     user      = update.effective_user
@@ -295,12 +304,18 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     try:
         if choice == "🚨 إرسال استغاثة / حالة عاجلة":
+            sos_keyboard = [[InlineKeyboardButton("تواصل مع الحالة 🚨", url=contact_url)]]
+            sos_markup = InlineKeyboardMarkup(sos_keyboard)
+            
             await context.bot.send_message(
-                chat_id=ADMIN_ID,
-                text=f"🚨 *استغاثة عاجلة جديدة!*\n\nالمُرسِل: {username}\nالرسالة:\n{user_text}",
+                chat_id=CHANNEL_ID,
+                text=f"🚨 *استغاثة عاجلة*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
                 parse_mode="Markdown",
+                reply_markup=sos_markup
             )
-            await update.message.reply_text("✅ تم إرسال استغاثتك للمشرف بنجاح.", reply_markup=MAIN_KEYBOARD)
+            await update.message.reply_text("✅ تم نشر استغاثتك في القناة بنجاح.", reply_markup=MAIN_KEYBOARD)
+
+
 
         elif choice == "💼 وظائف خالية":
             # إرسال للإدارة للموافقة
@@ -351,16 +366,28 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             await update.message.reply_text("✅ تم نشر حالة الطوارئ في القناة بنجاح! نسأل الله الشفاء العاجل.", reply_markup=MAIN_KEYBOARD)
 
         elif choice == "🏠 عقارات وسكن (بيع / إيجار)":
-            real_estate_keyboard = [[InlineKeyboardButton("تواصل مع صاحب العقار 📞", url=contact_url)]]
-            real_estate_markup = InlineKeyboardMarkup(real_estate_keyboard)
+            # إرسال للإدارة للموافقة
+            keyboard = [
+                [
+                    InlineKeyboardButton("✅ موافقة ونشر", callback_data=f"approve_realestate_{user.id}"),
+                    InlineKeyboardButton("❌ رفض", callback_data=f"reject_realestate_{user.id}")
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            realestate_request_text = (
+                f"🏠 *طلب نشر إعلان عقارات وسكن*\n"
+                f"من: {username} (ID: {user.id})\n\n"
+                f"التفاصيل:\n{user_text}"
+            )
             
             await context.bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=f"🏠 *إعلان عقارات وسكن*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
+                chat_id=ADMIN_ID,
+                text=realestate_request_text,
                 parse_mode="Markdown",
-                reply_markup=real_estate_markup
+                reply_markup=reply_markup
             )
-            await update.message.reply_text("✅ تم نشر إعلان العقار في القناة بنجاح!", reply_markup=MAIN_KEYBOARD)
+            await update.message.reply_text("✅ تم استلام إعلان العقار وجاري مراجعته من الإدارة قبل النشر.", reply_markup=MAIN_KEYBOARD)
 
         else:
             # خدمات تنشر مباشرة للقناة (مثل المفقودات)
@@ -394,16 +421,16 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     
     parts = admin_msg_text.split("التفاصيل:\n", 1)
     if len(parts) > 1:
-        job_details = parts[1].strip()
+        details = parts[1].strip()
     else:
-        job_details = "تفاصيل غير معروفة"
+        details = "تفاصيل غير معروفة"
 
     if data.startswith("approve_job_"):
         user_id = data.split("_")[2]
         try:
             await context.bot.send_message(
                 chat_id=CHANNEL_ID,
-                text=f"💼 *وظائف خالية*\n\n{job_details}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
+                text=f"💼 *وظائف خالية*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
                 parse_mode="Markdown",
             )
             await context.bot.send_message(chat_id=user_id, text="✅ تم الموافقة على إعلان الوظيفة ونشره في القناة!")
@@ -419,6 +446,35 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             await query.edit_message_text(text=f"{admin_msg_text}\n\n❌ **تم الرفض والإلغاء.**")
         except Exception as e:
             logger.error("Error rejecting job: %s", e)
+
+    elif data.startswith("approve_realestate_"):
+        user_id = data.split("_")[2]
+        try:
+            # نحاول الحصول على يوزرنيم المستخدم إذا أمكن، أو استخدام رابط الـ ID
+            real_estate_keyboard = [[InlineKeyboardButton("تواصل مع صاحب العقار 📞", url=f"tg://user?id={user_id}")]]
+            real_estate_markup = InlineKeyboardMarkup(real_estate_keyboard)
+            
+            await context.bot.send_message(
+                chat_id=CHANNEL_ID,
+                text=f"🏠 *إعلان عقارات وسكن*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
+                parse_mode="Markdown",
+                reply_markup=real_estate_markup
+            )
+            await context.bot.send_message(chat_id=user_id, text="✅ تم الموافقة على إعلان العقار ونشره في القناة!")
+            await query.edit_message_text(text=f"{admin_msg_text}\n\n✅ **تمت الموافقة والنشر.**")
+        except Exception as e:
+            logger.error("Error approving realestate: %s", e)
+            await query.edit_message_text(text=f"{admin_msg_text}\n\n❌ **حدث خطأ أثناء النشر.**")
+            
+    elif data.startswith("reject_realestate_"):
+        user_id = data.split("_")[2]
+        try:
+            await context.bot.send_message(chat_id=user_id, text="❌ نعتذر منك، تم رفض إعلان العقار من قبل الإدارة.")
+            await query.edit_message_text(text=f"{admin_msg_text}\n\n❌ **تم الرفض والإلغاء.**")
+        except Exception as e:
+            logger.error("Error rejecting realestate: %s", e)
+
+
 
 # ════════════════════════════════════════════
 #  أوامر الأدمن والأذكار المجدولة
@@ -488,7 +544,7 @@ def main():
     t = datetime.time(hour=6, minute=0, tzinfo=tz)
     app.job_queue.run_daily(send_daily_azkar, time=t)
 
-    # لاحظ التغيير الجذري هنا لحل مشكلة التعليق في القوائم
+    # تم إزالة allow_reentry لمنع تداخل النصوص مع القوائم
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("start", start),
@@ -498,7 +554,6 @@ def main():
             TYPING_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_input)],
         },
         fallbacks=[CommandHandler("start", start)],
-        allow_reentry=True,
     )
 
     app.add_handler(conv_handler)
