@@ -1,6 +1,7 @@
 import logging
 import sqlite3
 import asyncio
+import datetime
 from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -125,8 +126,10 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return CHOOSING
     
     elif text == "🩸 التبرع بالدم والطوارئ":
-        await update.message.reply_text(BLOOD_DONATION_TEXT, parse_mode="Markdown")
-        return CHOOSING
+        await update.message.reply_text(
+            "🩸 اكتب تفاصيل الحالة الحرجة فوراً (مثال: الفصيلة المطلوبة، المستشفى، ورقم تليفون التواصل):"
+        )
+        return TYPING_INPUT
         
     elif text == "🛠️ الخدمات المنزلية (الصنايعية)":
         await update.message.reply_text(HOME_SERVICES_TEXT, parse_mode="Markdown")
@@ -233,6 +236,19 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             )
             await update.message.reply_text("✅ تم نشر إعلان المواصلة في القناة بنجاح!", reply_markup=MAIN_KEYBOARD)
 
+        elif choice == "🩸 التبرع بالدم والطوارئ":
+            contact_url = f"https://t.me/{user.username}" if user.username else f"tg://user?id={user.id}"
+            blood_keyboard = [[InlineKeyboardButton("تواصل مع حالة الطوارئ 🩸", url=contact_url)]]
+            blood_markup = InlineKeyboardMarkup(blood_keyboard)
+            
+            await context.bot.send_message(
+                chat_id=CHANNEL_ID,
+                text=f"🚨 *نداء طوارئ عاجل - تبرع بالدم* 🚨\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
+                parse_mode="Markdown",
+                reply_markup=blood_markup
+            )
+            await update.message.reply_text("✅ تم نشر حالة الطوارئ في القناة بنجاح! نسأل الله الشفاء العاجل.", reply_markup=MAIN_KEYBOARD)
+
         else:
             # خدمات تنشر مباشرة للقناة
             await context.bot.send_message(
@@ -336,6 +352,19 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await status.edit_text(f"✅ أُرسلت لـ {sent} مستخدم.\n❌ فشل لـ {failed} مستخدم.")
 
 
+async def send_daily_azkar(context: ContextTypes.DEFAULT_TYPE):
+    azkar_text = (
+        "☀️ *أذكار الصباح | بنية فتح الأبواب والبركة* ☀️\n\n"
+        "- سبحان الله\n"
+        "- الحمد لله\n"
+        "- لا إله إلا الله\n"
+        "- صلى الله على محمد، صلى الله عليه وسلم (صلِّ على رسول الله)"
+    )
+    try:
+        await context.bot.send_message(chat_id=CHANNEL_ID, text=azkar_text, parse_mode="Markdown")
+    except Exception as e:
+        logger.error("Failed to send morning azkar: %s", e)
+
 # ════════════════════════════════════════════
 #  الإعداد والتشغيل
 # ════════════════════════════════════════════
@@ -343,6 +372,11 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 def main():
     init_db()
     app = Application.builder().token(BOT_TOKEN).build()
+    
+    # إعداد أذكار الصباح يومياً الساعة 6 صباحاً بتوقيت مصر
+    tz = datetime.timezone(datetime.timedelta(hours=3))
+    t = datetime.time(hour=6, minute=0, tzinfo=tz)
+    app.job_queue.run_daily(send_daily_azkar, time=t)
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
