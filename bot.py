@@ -78,8 +78,7 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
         ["🛠️ الخدمات", "🩺 دليل الأطباء والعيادات"],
-        ["➕ أضف عملك", "🛺 اطلب توك توك"],
-        ["🌆 أذكار المساء"]
+        ["➕ أضف عملك", "🛺 اطلب توك توك"]
     ],
     resize_keyboard=True,
 )
@@ -163,10 +162,6 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text(TUKTUK_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
         
-    elif "أذكار المساء" in text:
-        await update.message.reply_text(f"🌆 *أذكار المساء*\n\n{EVENING_AZKAR_TEXT}", parse_mode="Markdown")
-        return ConversationHandler.END
-        
     elif "استار ميتال" in text:
         contact_keyboard = [[InlineKeyboardButton("تواصل عبر واتساب 💬", url="https://wa.me/201014770786")]]
         contact_markup = InlineKeyboardMarkup(contact_keyboard)
@@ -244,7 +239,7 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
              "💼 وظائف خالية", "🛠️ الخدمات", "🩺 دليل الأطباء والعيادات", "🪟 معرض استار ميتال للألوميتال",
              "📦 خدمات الشحن والتوصيل (الطيارين)", "🏠 عقارات وسكن (بيع / إيجار)", "➕ أضف عملك",
              "🛺 اطلب توك توك", "🔙 رجوع للقائمة الرئيسية", 
-             "📦 أبلغ عن مفقود", "🏠 عقارات وسكن", "🚕 مشاركة المشاوير", "🛠 الخدمات", "🌆 أذكار المساء"]
+             "📦 أبلغ عن مفقود", "🏠 عقارات وسكن", "🚕 مشاركة المشاوير", "🛠 الخدمات"]
              
     if user_text in KNOWN:
         context.user_data.clear()
