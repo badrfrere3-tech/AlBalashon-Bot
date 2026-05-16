@@ -18,27 +18,28 @@ BOT_TOKEN  = "8692227293:AAFEqO_5EqAm-jTB7GGnfVMlMh8Ru1iwSeM"
 ADMIN_ID   = 5481609181
 CHANNEL_ID = "@AlBalashon_Channel"
 
+# ─── الكلمات المحظورة ────────────────────────
+BAD_WORDS = ["احا", "خرا", "عرص", "متناك", "شرموط", "كلب", "ابن الكلب"] # يمكن تعديلها لاحقاً
+
+def is_profane(text: str) -> bool:
+    if not text:
+        return False
+    t = text.lower()
+    for w in BAD_WORDS:
+        if w in t:
+            return True
+    return False
+
 # ─── مراحل المحادثة ──────────────────────────
 CHOOSING, TYPING_INPUT = range(2)
 
 # ─── نصوص ثابتة (يمكنك تعديلها لاحقاً) ────────
-TRANSPORT_TEXT = (
-    "🚌 *دليل مواعيد مواصلات البلشون المحدث:*\n\n"
-    "⏱️ *ميكروباص الزقازيق:* من الـ 6 صباحاً وحتى الـ 11 مساءً (من الموقف).\n"
-    "⏱️ *ميكروباص بيلبيس:* متوفر على مدار الساعة من على الطريق الرئيسي.\n"
-    "🚂 *قطارات محطة بيلبيس (إلى القاهرة):*\n"
-    "- قطار رقم 941 (مكيف) الساعة 6:15 صباحاً.\n"
-    "- قطار رقم 953 (مميز) الساعة 7:30 صباحاً."
-)
-
 DOCTORS_TEXT = (
     "🩺 *دليل الأطباء والعيادات:*\n\n"
     "🏥 *باطنة:* د. (الاسم) - المواعيد: من 5 لـ 9 مساءً\n"
     "🦷 *أسنان:* د. (الاسم) - المواعيد: من 3 لـ 8 مساءً\n"
     "*(يمكنك إضافة العيادات هنا)*"
 )
-
-
 
 # Services texts
 ELEC_TEXT = "⚡ *كهربائي:* (الاسم والرقم)"
@@ -55,7 +56,7 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
         ["🛠️ الخدمات", "🩺 دليل الأطباء والعيادات"],
-        ["🩸 التبرع بالدم والطوارئ", "🚌 مواعيد المواصلات"],
+        ["🩸 التبرع بالدم والطوارئ"],
     ],
     resize_keyboard=True,
 )
@@ -86,6 +87,7 @@ logger = logging.getLogger(__name__)
 def init_db():
     conn = sqlite3.connect("albalashon.db")
     conn.execute("CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY)")
+    conn.execute("CREATE TABLE IF NOT EXISTS banned_users (user_id INTEGER PRIMARY KEY)")
     conn.commit()
     conn.close()
 
@@ -94,6 +96,18 @@ def register_user(user_id: int):
     conn.execute("INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,))
     conn.commit()
     conn.close()
+
+def ban_user_db(user_id: int):
+    conn = sqlite3.connect("albalashon.db")
+    conn.execute("INSERT OR IGNORE INTO banned_users (user_id) VALUES (?)", (user_id,))
+    conn.commit()
+    conn.close()
+
+def is_user_banned(user_id: int) -> bool:
+    conn = sqlite3.connect("albalashon.db")
+    row = conn.execute("SELECT 1 FROM banned_users WHERE user_id = ?", (user_id,)).fetchone()
+    conn.close()
+    return bool(row)
 
 def get_all_user_ids() -> list:
     conn = sqlite3.connect("albalashon.db")
@@ -112,7 +126,12 @@ def get_user_count() -> int:
 # ════════════════════════════════════════════
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    register_user(update.effective_user.id)
+    user_id = update.effective_user.id
+    if is_user_banned(user_id):
+        await update.message.reply_text("⛔ لا يمكنك استخدام البوت لأنه قد تم حظرك.")
+        return ConversationHandler.END
+
+    register_user(user_id)
     await update.message.reply_text(
         "💡 مرحباً بك في منصة خدمات البلاشون الذكية.\nاختر الخدمة المطلوبة من الأزرار بالأسفل:",
         reply_markup=MAIN_KEYBOARD,
@@ -120,23 +139,42 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return CHOOSING
 
 # ════════════════════════════════════════════
+#  مساعد للحظر التلقائي
+# ════════════════════════════════════════════
+async def check_and_ban(text: str, update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    user_id = update.effective_user.id
+    if is_user_banned(user_id):
+        await update.message.reply_text("⛔ لا يمكنك استخدام البوت لأنه قد تم حظرك.")
+        return True
+    
+    if is_profane(text):
+        ban_user_db(user_id)
+        try:
+            await context.bot.ban_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
+        except Exception as e:
+            logger.error("Could not ban user %s from channel: %s", user_id, e)
+        await update.message.reply_text("⛔ تم حظرك نهائياً من البوت والقناة بسبب استخدام ألفاظ غير لائقة.")
+        return True
+    
+    return False
+
+# ════════════════════════════════════════════
 #  معالج اختيارات القوائم
 # ════════════════════════════════════════════
 
 async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     text = update.message.text
+    
+    if await check_and_ban(text, update, context):
+        return ConversationHandler.END
+
     context.user_data["choice"] = text
 
     # --- القائمة الرئيسية (نصوص مباشرة) ---
-    if text == "🚌 مواعيد المواصلات":
-        await update.message.reply_text(TRANSPORT_TEXT, parse_mode="Markdown")
-        return CHOOSING
-        
-    elif text == "🩺 دليل الأطباء والعيادات":
+    if text == "🩺 دليل الأطباء والعيادات":
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown")
         return CHOOSING
         
-
     elif text == "🛠️ الخدمات":
         await update.message.reply_text("اختر الخدمة المطلوبة من القائمة:", reply_markup=SERVICES_KEYBOARD)
         return CHOOSING
@@ -228,6 +266,10 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
 async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_text = update.message.text
+    
+    if await check_and_ban(user_text, update, context):
+        return ConversationHandler.END
+
     choice    = context.user_data.get("choice", "")
     user      = update.effective_user
     username  = f"@{user.username}" if user.username else str(user.id)
