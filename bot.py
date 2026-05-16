@@ -169,7 +169,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             "🚕 اكتب تفاصيل مشوارك الحالي:\n"
             "- هل أنت سواق ومعاك أماكن فاضية؟\n"
             "- ولا راكب ومحتاج مواصلة؟\n"
-            "- واكتب ساعتك ورقم تليفونك للتواصل."
+            "- واكتب ساعتك ومكان التحرك ورقم تليفونك للتواصل."
         )
         return TYPING_INPUT
 
@@ -221,10 +221,15 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             await update.message.reply_text("✅ تم استلام طلب نشر الوظيفة وجاري مراجعته من الإدارة.", reply_markup=MAIN_KEYBOARD)
 
         elif choice == "🚕 مشاركة المشاوير والمواصلات":
+            contact_url = f"https://t.me/{user.username}" if user.username else f"tg://user?id={user.id}"
+            ride_keyboard = [[InlineKeyboardButton("تواصل مع صاحب المشوار 💬", url=contact_url)]]
+            ride_markup = InlineKeyboardMarkup(ride_keyboard)
+            
             await context.bot.send_message(
                 chat_id=CHANNEL_ID,
                 text=f"🚕 *إعلان مواصلة فوري*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
                 parse_mode="Markdown",
+                reply_markup=ride_markup
             )
             await update.message.reply_text("✅ تم نشر إعلان المواصلة في القناة بنجاح!", reply_markup=MAIN_KEYBOARD)
 
