@@ -60,11 +60,6 @@ EMERGENCY_PHARMACY_INFO = (
 )
 
 # Services texts
-ELEC_TEXT = "⚡ *كهربائي:* (الاسم والرقم)"
-PLUMB_TEXT = "🚰 *سباك:* (الاسم والرقم)"
-CARP_TEXT = "🪚 *نجار:* (الاسم والرقم)"
-APPL_TEXT = "🔧 *صيانة أجهزة:* (الاسم والرقم)"
-MECH_TEXT = "👨‍🔧 *ميكانيكي وصيانة أعطال:* (الاسم والرقم)"
 DELIVERY_TEXT = "📦 *خدمات الشحن والتوصيل (الطيارين):* (الاسم والرقم)"
 
 # ─── لوحات المفاتيح ──────────────────────────
@@ -81,8 +76,6 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
 
 SERVICES_KEYBOARD = ReplyKeyboardMarkup(
     [
-        ["كهربائي", "سباك", "نجار"],
-        ["صيانة أجهزة", "👨‍🔧 ميكانيكي وصيانة أعطال"],
         ["📦 خدمات الشحن والتوصيل (الطيارين)"],
         ["🏠 عقارات وسكن (بيع / إيجار)"],
         ["🔙 رجوع للقائمة الرئيسية"]
@@ -170,21 +163,6 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
     # --- القائمة الفرعية (الخدمات - نصوص مباشرة) ---
-    elif text == "كهربائي":
-        await update.message.reply_text(ELEC_TEXT, parse_mode="Markdown")
-        return ConversationHandler.END
-    elif text == "سباك":
-        await update.message.reply_text(PLUMB_TEXT, parse_mode="Markdown")
-        return ConversationHandler.END
-    elif text == "نجار":
-        await update.message.reply_text(CARP_TEXT, parse_mode="Markdown")
-        return ConversationHandler.END
-    elif text == "صيانة أجهزة":
-        await update.message.reply_text(APPL_TEXT, parse_mode="Markdown")
-        return ConversationHandler.END
-    elif text == "👨‍🔧 ميكانيكي وصيانة أعطال":
-        await update.message.reply_text(MECH_TEXT, parse_mode="Markdown")
-        return ConversationHandler.END
     elif text == "📦 خدمات الشحن والتوصيل (الطيارين)":
         await update.message.reply_text(DELIVERY_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
@@ -256,8 +234,8 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     KNOWN_BUTTONS = [
         "🚨 إرسال استغاثة / حالة عاجلة", "🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ",
         "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", "🚕 مشاركة المشاوير والمواصلات",
-        "💼 وظائف خالية", "🛠️ الخدمات", "🩺 دليل الأطباء والعيادات", "كهربائي", "سباك", "نجار",
-        "صيانة أجهزة", "👨‍🔧 ميكانيكي وصيانة أعطال", "📦 خدمات الشحن والتوصيل (الطيارين)",
+        "💼 وظائف خالية", "🛠️ الخدمات", "🩺 دليل الأطباء والعيادات",
+        "📦 خدمات الشحن والتوصيل (الطيارين)",
         "🏠 عقارات وسكن (بيع / إيجار)", "🔙 رجوع للقائمة الرئيسية"
     ]
     if user_text in KNOWN_BUTTONS:
