@@ -429,7 +429,7 @@ def main():
             TYPING_INPUT: [MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, process_input)],
         },
         fallbacks=[CommandHandler("start", start)],
-        allow_reentry=True,
+        allow_reentry=False,
         name="main_conversation",
         persistent=True
     )
