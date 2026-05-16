@@ -38,16 +38,7 @@ DOCTORS_TEXT = (
     "*(يمكنك إضافة العيادات هنا)*"
 )
 
-PRAYER_TIMES_TEXT = (
-    "🕋 *مواقيت الصلاة لمحافظة الشرقية / مركز فاقوس:*\n\n"
-    "🌅 *الفجر:* 03:15 ص\n"
-    "☀️ *الشروق:* 04:50 ص\n"
-    "🕛 *الظهر:* 11:50 ص\n"
-    "🕒 *العصر:* 03:30 م\n"
-    "🌇 *المغرب:* 06:45 م\n"
-    "🌃 *العشاء:* 08:15 م\n\n"
-    "🤲 *دعاء:* اللهم اجعلنا ممن يحافظون على الصلاة في أوقاتها، وتقبل منا صالح الأعمال."
-)
+
 
 # Services texts
 ELEC_TEXT = "⚡ *كهربائي:* (الاسم والرقم)"
@@ -60,7 +51,7 @@ DELIVERY_TEXT = "📦 *خدمات الشحن والتوصيل (الطيارين)
 # ─── لوحات المفاتيح ──────────────────────────
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
     [
-        ["🚨 إرسال استغاثة / حالة عاجلة", "🕋 مواقيت الصلاة"],
+        ["🚨 إرسال استغاثة / حالة عاجلة"],
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
         ["🛠️ الخدمات", "🩺 دليل الأطباء والعيادات"],
@@ -145,10 +136,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown")
         return CHOOSING
         
-    elif text == "🕋 مواقيت الصلاة":
-        await update.message.reply_text(PRAYER_TIMES_TEXT, parse_mode="Markdown")
-        return CHOOSING
-        
+
     elif text == "🛠️ الخدمات":
         await update.message.reply_text("اختر الخدمة المطلوبة من القائمة:", reply_markup=SERVICES_KEYBOARD)
         return CHOOSING
