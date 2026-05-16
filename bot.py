@@ -1,7 +1,7 @@
 import logging
 import sqlite3
 import asyncio
-from telegram import Update, ReplyKeyboardMarkup
+from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -33,7 +33,7 @@ TRANSPORT_TEXT = (
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
     [
         ["🚨 إرسال استغاثة / حالة عاجلة"],
-        ["📦 أبلغ عن مفقود / أمانة", "🛒 عرض في سوق التكافل"],
+        ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚌 مواعيد المواصلات", "💼 وظائف خالية"],
     ],
     resize_keyboard=True,
@@ -125,11 +125,16 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         )
         return TYPING_INPUT
 
-    elif text == "🛒 عرض في سوق التكافل":
+    elif text == "📢 إعلان منتج / خدماتنا":
+        keyboard = [
+            [InlineKeyboardButton("تواصل معنا 💬", url="https://wa.me/201020549760")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(
-            "🛒 اكتب تفاصيل المنتج، السعر، ورقم تليفونك للنشر:"
+            "مرحباً بك في قسم الإعلانات والخدمات. للتواصل مع الإدارة وحجز مساحة إعلانية لمنتجك أو محلك جوه البوت والقناة، يرجى التواصل معنا عبر الواتساب",
+            reply_markup=reply_markup
         )
-        return TYPING_INPUT
+        return CHOOSING
 
     else:
         # أي نص غير معروف → أعد القائمة
