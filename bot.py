@@ -31,20 +31,6 @@ TRANSPORT_TEXT = (
     "- قطار رقم 953 (مميز) الساعة 7:30 صباحاً."
 )
 
-BLOOD_DONATION_TEXT = (
-    "🩸 *التبرع بالدم والطوارئ:*\n\n"
-    "للتواصل في حالات الطوارئ وطلب متبرعين بالدم، يرجى كتابة منشور على القناة.\n"
-    "فصائل الدم المتوفرة حالياً في بنك الدم بالقرية سيتم الإعلان عنها هنا مستقبلاً."
-)
-
-HOME_SERVICES_TEXT = (
-    "🛠️ *الخدمات المنزلية (الصنايعية):*\n\n"
-    "⚡ *كهربائي:* (الاسم والرقم)\n"
-    "🚰 *سباك:* (الاسم والرقم)\n"
-    "🪚 *نجار:* (الاسم والرقم)\n"
-    "*(يمكنك إضافة الأسماء هنا)*"
-)
-
 DOCTORS_TEXT = (
     "🩺 *دليل الأطباء والعيادات:*\n\n"
     "🏥 *باطنة:* د. (الاسم) - المواعيد: من 5 لـ 9 مساءً\n"
@@ -52,14 +38,44 @@ DOCTORS_TEXT = (
     "*(يمكنك إضافة العيادات هنا)*"
 )
 
-# ─── لوحة المفاتيح الرئيسية ─────────────────
+PRAYER_TIMES_TEXT = (
+    "🕋 *مواقيت الصلاة لمحافظة الشرقية / مركز فاقوس:*\n\n"
+    "🌅 *الفجر:* 03:15 ص\n"
+    "☀️ *الشروق:* 04:50 ص\n"
+    "🕛 *الظهر:* 11:50 ص\n"
+    "🕒 *العصر:* 03:30 م\n"
+    "🌇 *المغرب:* 06:45 م\n"
+    "🌃 *العشاء:* 08:15 م\n\n"
+    "🤲 *دعاء:* اللهم اجعلنا ممن يحافظون على الصلاة في أوقاتها، وتقبل منا صالح الأعمال."
+)
+
+# Services texts
+ELEC_TEXT = "⚡ *كهربائي:* (الاسم والرقم)"
+PLUMB_TEXT = "🚰 *سباك:* (الاسم والرقم)"
+CARP_TEXT = "🪚 *نجار:* (الاسم والرقم)"
+APPL_TEXT = "🔧 *صيانة أجهزة:* (الاسم والرقم)"
+MECH_TEXT = "👨‍🔧 *ميكانيكي وصيانة أعطال:* (الاسم والرقم)"
+DELIVERY_TEXT = "📦 *خدمات الشحن والتوصيل (الطيارين):* (الاسم والرقم)"
+
+# ─── لوحات المفاتيح ──────────────────────────
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
     [
-        ["🚨 إرسال استغاثة / حالة عاجلة"],
+        ["🚨 إرسال استغاثة / حالة عاجلة", "🕋 مواقيت الصلاة"],
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
-        ["🛠️ الخدمات المنزلية (الصنايعية)", "🩺 دليل الأطباء والعيادات"],
+        ["🛠️ الخدمات", "🩺 دليل الأطباء والعيادات"],
         ["🩸 التبرع بالدم والطوارئ", "🚌 مواعيد المواصلات"],
+    ],
+    resize_keyboard=True,
+)
+
+SERVICES_KEYBOARD = ReplyKeyboardMarkup(
+    [
+        ["كهربائي", "سباك", "نجار"],
+        ["صيانة أجهزة", "👨‍🔧 ميكانيكي وصيانة أعطال"],
+        ["📦 خدمات الشحن والتوصيل (الطيارين)"],
+        ["🏠 عقارات وسكن (بيع / إيجار)"],
+        ["🔙 رجوع للقائمة الرئيسية"]
     ],
     resize_keyboard=True,
 )
@@ -113,32 +129,55 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return CHOOSING
 
 # ════════════════════════════════════════════
-#  معالج اختيارات القائمة الرئيسية
+#  معالج اختيارات القوائم
 # ════════════════════════════════════════════
 
 async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     text = update.message.text
     context.user_data["choice"] = text
 
-    # الردود المباشرة (النصوص الثابتة)
+    # --- القائمة الرئيسية (نصوص مباشرة) ---
     if text == "🚌 مواعيد المواصلات":
         await update.message.reply_text(TRANSPORT_TEXT, parse_mode="Markdown")
-        return CHOOSING
-    
-    elif text == "🩸 التبرع بالدم والطوارئ":
-        await update.message.reply_text(
-            "🩸 اكتب تفاصيل الحالة الحرجة فوراً (مثال: الفصيلة المطلوبة، المستشفى، ورقم تليفون التواصل):"
-        )
-        return TYPING_INPUT
-        
-    elif text == "🛠️ الخدمات المنزلية (الصنايعية)":
-        await update.message.reply_text(HOME_SERVICES_TEXT, parse_mode="Markdown")
         return CHOOSING
         
     elif text == "🩺 دليل الأطباء والعيادات":
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown")
         return CHOOSING
+        
+    elif text == "🕋 مواقيت الصلاة":
+        await update.message.reply_text(PRAYER_TIMES_TEXT, parse_mode="Markdown")
+        return CHOOSING
+        
+    elif text == "🛠️ الخدمات":
+        await update.message.reply_text("اختر الخدمة المطلوبة من القائمة:", reply_markup=SERVICES_KEYBOARD)
+        return CHOOSING
+        
+    elif text == "🔙 رجوع للقائمة الرئيسية":
+        await update.message.reply_text("القائمة الرئيسية:", reply_markup=MAIN_KEYBOARD)
+        return CHOOSING
 
+    # --- القائمة الفرعية (الخدمات - نصوص مباشرة) ---
+    elif text == "كهربائي":
+        await update.message.reply_text(ELEC_TEXT, parse_mode="Markdown")
+        return CHOOSING
+    elif text == "سباك":
+        await update.message.reply_text(PLUMB_TEXT, parse_mode="Markdown")
+        return CHOOSING
+    elif text == "نجار":
+        await update.message.reply_text(CARP_TEXT, parse_mode="Markdown")
+        return CHOOSING
+    elif text == "صيانة أجهزة":
+        await update.message.reply_text(APPL_TEXT, parse_mode="Markdown")
+        return CHOOSING
+    elif text == "👨‍🔧 ميكانيكي وصيانة أعطال":
+        await update.message.reply_text(MECH_TEXT, parse_mode="Markdown")
+        return CHOOSING
+    elif text == "📦 خدمات الشحن والتوصيل (الطيارين)":
+        await update.message.reply_text(DELIVERY_TEXT, parse_mode="Markdown")
+        return CHOOSING
+
+    # --- القائمة الرئيسية (إعلانات وروابط) ---
     elif text == "📢 إعلان منتج / خدماتنا":
         keyboard = [[InlineKeyboardButton("تواصل معنا 💬", url="https://wa.me/201020549760")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -148,7 +187,13 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         )
         return CHOOSING
 
-    # الردود التي تتطلب إدخال بيانات من المستخدم
+    # --- الردود التي تتطلب إدخال بيانات من المستخدم ---
+    elif text == "🩸 التبرع بالدم والطوارئ":
+        await update.message.reply_text(
+            "🩸 اكتب تفاصيل الحالة الحرجة فوراً (مثال: الفصيلة المطلوبة، المستشفى، ورقم تليفون التواصل):"
+        )
+        return TYPING_INPUT
+
     elif text == "💼 وظائف خالية":
         await update.message.reply_text(
             "💼 اكتب تفاصيل الوظيفة (التخصص، المرتب، رقم التواصل) وسيتم إرسالها للإدارة للموافقة عليها قبل النشر:"
@@ -175,8 +220,17 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             "- واكتب ساعتك ومكان التحرك ورقم تليفونك للتواصل."
         )
         return TYPING_INPUT
+        
+    elif text == "🏠 عقارات وسكن (بيع / إيجار)":
+        await update.message.reply_text(
+            "🏠 اكتب تفاصيل العقار:\n"
+            "(شقة، محل، أرض، بيع أم إيجار، السعر، والمواصفات ورقم للتواصل):"
+        )
+        return TYPING_INPUT
 
     else:
+        # نص غير معروف، أعد القائمة الحالية (سواء رئيسية أو فرعية)
+        # لتسهيل الأمر سنعيد القائمة الرئيسية
         await update.message.reply_text("اختر خدمة من القائمة 👇", reply_markup=MAIN_KEYBOARD)
         return CHOOSING
 
@@ -189,6 +243,9 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     choice    = context.user_data.get("choice", "")
     user      = update.effective_user
     username  = f"@{user.username}" if user.username else str(user.id)
+
+    # تحديد رابط التواصل
+    contact_url = f"https://t.me/{user.username}" if user.username else f"tg://user?id={user.id}"
 
     try:
         if choice == "🚨 إرسال استغاثة / حالة عاجلة":
@@ -224,7 +281,6 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             await update.message.reply_text("✅ تم استلام طلب نشر الوظيفة وجاري مراجعته من الإدارة.", reply_markup=MAIN_KEYBOARD)
 
         elif choice == "🚕 مشاركة المشاوير والمواصلات":
-            contact_url = f"https://t.me/{user.username}" if user.username else f"tg://user?id={user.id}"
             ride_keyboard = [[InlineKeyboardButton("تواصل مع صاحب المشوار 💬", url=contact_url)]]
             ride_markup = InlineKeyboardMarkup(ride_keyboard)
             
@@ -237,7 +293,6 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             await update.message.reply_text("✅ تم نشر إعلان المواصلة في القناة بنجاح!", reply_markup=MAIN_KEYBOARD)
 
         elif choice == "🩸 التبرع بالدم والطوارئ":
-            contact_url = f"https://t.me/{user.username}" if user.username else f"tg://user?id={user.id}"
             blood_keyboard = [[InlineKeyboardButton("تواصل مع حالة الطوارئ 🩸", url=contact_url)]]
             blood_markup = InlineKeyboardMarkup(blood_keyboard)
             
@@ -249,8 +304,21 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             )
             await update.message.reply_text("✅ تم نشر حالة الطوارئ في القناة بنجاح! نسأل الله الشفاء العاجل.", reply_markup=MAIN_KEYBOARD)
 
+        elif choice == "🏠 عقارات وسكن (بيع / إيجار)":
+            real_estate_keyboard = [[InlineKeyboardButton("تواصل مع صاحب العقار 📞", url=contact_url)]]
+            real_estate_markup = InlineKeyboardMarkup(real_estate_keyboard)
+            
+            await context.bot.send_message(
+                chat_id=CHANNEL_ID,
+                text=f"🏠 *إعلان عقارات وسكن*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
+                parse_mode="Markdown",
+                reply_markup=real_estate_markup
+            )
+            # بما أنه كان في قائمة الخدمات، نرجعه لها أو للرئيسية. القائمة الرئيسية أفضل بعد إتمام عملية
+            await update.message.reply_text("✅ تم نشر إعلان العقار في القناة بنجاح!", reply_markup=MAIN_KEYBOARD)
+
         else:
-            # خدمات تنشر مباشرة للقناة
+            # خدمات تنشر مباشرة للقناة (مثل المفقودات)
             await context.bot.send_message(
                 chat_id=CHANNEL_ID,
                 text=f"📢 *{choice}*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
@@ -276,7 +344,6 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     data = query.data
     admin_msg_text = query.message.text
     
-    # Extract the actual job text by splitting "التفاصيل:\n"
     parts = admin_msg_text.split("التفاصيل:\n", 1)
     if len(parts) > 1:
         job_details = parts[1].strip()
@@ -286,15 +353,12 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if data.startswith("approve_job_"):
         user_id = data.split("_")[2]
         try:
-            # Publish to channel
             await context.bot.send_message(
                 chat_id=CHANNEL_ID,
                 text=f"💼 *وظائف خالية*\n\n{job_details}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
                 parse_mode="Markdown",
             )
-            # Notify user
             await context.bot.send_message(chat_id=user_id, text="✅ تم الموافقة على إعلان الوظيفة ونشره في القناة!")
-            # Update Admin msg
             await query.edit_message_text(text=f"{admin_msg_text}\n\n✅ **تمت الموافقة والنشر.**")
         except Exception as e:
             logger.error("Error approving job: %s", e)
@@ -303,15 +367,13 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     elif data.startswith("reject_job_"):
         user_id = data.split("_")[2]
         try:
-            # Notify user
             await context.bot.send_message(chat_id=user_id, text="❌ نعتذر منك، تم رفض إعلان الوظيفة من قبل الإدارة.")
-            # Update Admin msg
             await query.edit_message_text(text=f"{admin_msg_text}\n\n❌ **تم الرفض والإلغاء.**")
         except Exception as e:
             logger.error("Error rejecting job: %s", e)
 
 # ════════════════════════════════════════════
-#  أوامر الأدمن
+#  أوامر الأدمن والأذكار المجدولة
 # ════════════════════════════════════════════
 
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
