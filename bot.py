@@ -11,6 +11,7 @@ from telegram.ext import (
     filters,
     ContextTypes,
     ConversationHandler,
+    PicklePersistence,
 )
 
 # ─── الإعدادات ───────────────────────────────
@@ -404,7 +405,8 @@ async def send_daily_azkar(context: ContextTypes.DEFAULT_TYPE):
 # ════════════════════════════════════════════
 def main():
     init_db()
-    app = Application.builder().token(BOT_TOKEN).build()
+    persistence = PicklePersistence(filepath="albalashon_state.pickle")
+    app = Application.builder().token(BOT_TOKEN).persistence(persistence).build()
     
     tz = datetime.timezone(datetime.timedelta(hours=3))
     t = datetime.time(hour=6, minute=0, tzinfo=tz)
