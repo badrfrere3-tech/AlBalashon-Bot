@@ -47,10 +47,10 @@ DOCTORS_TEXT = (
 )
 
 EMERGENCY_PHARMACY_INFO = (
-    "👨‍⚕️ *صيدلية الطوارئ الليلة بالبلاشون هي:* [اسم الصيدلية تجريبي]\n"
-    "📍 *العنوان:* [مكان الصيدلية بالظبط]\n"
-    "📞 *للتواصل والدليفري:* [رقم التليفون أو الموبايل]\n\n"
-    "⏰ *الشيفت مستمر حتى الساعة 8 صباحاً*"
+    "👨‍⚕️ *صيدلية الطوارئ الليلة بالبلاشون هي:* صيدلية دكتور إبراهيم مصطفى خضر\n"
+    "📍 *العنوان:* بجوار مسجد تلعب\n"
+    "📞 *للتواصل والدليفري:* 01002707560\n\n"
+    "⏰ *الشيفت مستمر حتى الساعة 3 صباحاً*"
 )
 
 DELIVERY_TEXT = "📦 *خدمات الشحن والتوصيل (الطيارين):* (الاسم والرقم)"
@@ -157,7 +157,9 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
     elif text == "🏥 صيدليات الطوارئ الليلة":
-        await update.message.reply_text(EMERGENCY_PHARMACY_INFO, parse_mode="Markdown")
+        contact_keyboard = [[InlineKeyboardButton("تواصل عبر واتساب 💬", url="https://wa.me/201002707560")]]
+        contact_markup = InlineKeyboardMarkup(contact_keyboard)
+        await update.message.reply_text(EMERGENCY_PHARMACY_INFO, parse_mode="Markdown", reply_markup=contact_markup)
         return ConversationHandler.END
         
     elif text == "📦 خدمات الشحن والتوصيل (الطيارين)":
