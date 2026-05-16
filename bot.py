@@ -41,6 +41,13 @@ DOCTORS_TEXT = (
     "*(يمكنك إضافة العيادات هنا)*"
 )
 
+EMERGENCY_PHARMACY_INFO = (
+    "👨‍⚕️ *صيدلية الطوارئ الليلة بالبلاشون هي:* [اسم الصيدلية تجريبي]\n"
+    "📍 *العنوان:* [مكان الصيدلية بالظبط]\n"
+    "📞 *للتواصل والدليفري:* [رقم التليفون أو الموبايل]\n\n"
+    "⏰ *الشيفت مستمر حتى الساعة 8 صباحاً*"
+)
+
 # Services texts
 ELEC_TEXT = "⚡ *كهربائي:* (الاسم والرقم)"
 PLUMB_TEXT = "🚰 *سباك:* (الاسم والرقم)"
@@ -53,10 +60,10 @@ DELIVERY_TEXT = "📦 *خدمات الشحن والتوصيل (الطيارين)
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
     [
         ["🚨 إرسال استغاثة / حالة عاجلة"],
+        ["🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ"],
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
         ["🛠️ الخدمات", "🩺 دليل الأطباء والعيادات"],
-        ["🩸 التبرع بالدم والطوارئ"],
     ],
     resize_keyboard=True,
 )
@@ -173,6 +180,10 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     # --- القائمة الرئيسية (نصوص مباشرة) ---
     if text == "🩺 دليل الأطباء والعيادات":
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown")
+        return CHOOSING
+        
+    elif text == "🏥 صيدليات الطوارئ الليلة":
+        await update.message.reply_text(EMERGENCY_PHARMACY_INFO, parse_mode="Markdown")
         return CHOOSING
         
     elif text == "🛠️ الخدمات":
