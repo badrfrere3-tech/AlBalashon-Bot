@@ -209,7 +209,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
 # ════════════════════════════════════════════
-#  معالج النص المُدخَل
+#  معالج النص المُدخَل (نظام المراجعة الشامل)
 # ════════════════════════════════════════════
 async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_text = update.message.text or update.message.caption or ""
@@ -232,63 +232,54 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     choice    = context.user_data.get("choice", "")
     user      = update.effective_user
     username  = f"@{user.username}" if user.username else str(user.id)
-    contact_url = f"https://t.me/{user.username}" if user.username else f"tg://user?id={user.id}"
 
     try:
-        if choice == "🚨 إرسال استغاثة / حالة عاجلة":
-            sos_markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع الحالة 🚨", url=contact_url)]])
-            text_to_send = f"🚨 *استغاثة عاجلة*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
-            if photo_file_id: await context.bot.send_photo(CHANNEL_ID, photo_file_id, caption=text_to_send, parse_mode="Markdown", reply_markup=sos_markup)
-            else: await context.bot.send_message(CHANNEL_ID, text=text_to_send, parse_mode="Markdown", reply_markup=sos_markup)
-            await update.message.reply_text("✅ تم النشر.", reply_markup=MAIN_KEYBOARD)
-
-        elif choice == "💼 وظائف خالية":
-            markup = InlineKeyboardMarkup([[InlineKeyboardButton("✅ موافقة ونشر", callback_data=f"approve_job_{user.id}"), InlineKeyboardButton("❌ رفض", callback_data=f"reject_job_{user.id}")]])
-            job_req = f"💼 *طلب نشر وظيفة*\nمن: {username}\n\nالتفاصيل:\n{user_text}"
-            if photo_file_id: await context.bot.send_photo(ADMIN_ID, photo_file_id, caption=job_req, parse_mode="Markdown", reply_markup=markup)
-            else: await context.bot.send_message(ADMIN_ID, text=job_req, parse_mode="Markdown", reply_markup=markup)
-            await update.message.reply_text("✅ تم الإرسال للإدارة.", reply_markup=MAIN_KEYBOARD)
-
-        elif choice == "🚕 مشاركة المشاوير والمواصلات":
-            markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع صاحب المشوار 💬", url=contact_url)]])
-            text_to_send = f"🚕 *إعلان مواصلة فوري*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
-            if photo_file_id: await context.bot.send_photo(CHANNEL_ID, photo_file_id, caption=text_to_send, parse_mode="Markdown", reply_markup=markup)
-            else: await context.bot.send_message(CHANNEL_ID, text=text_to_send, parse_mode="Markdown", reply_markup=markup)
-            await update.message.reply_text("✅ تم النشر!", reply_markup=MAIN_KEYBOARD)
-
-        elif choice == "🩸 التبرع بالدم والطوارئ":
-            markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع حالة الطوارئ 🩸", url=contact_url)]])
-            text_to_send = f"🚨 *نداء طوارئ عاجل - تبرع بالدم* 🚨\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
-            if photo_file_id: await context.bot.send_photo(CHANNEL_ID, photo_file_id, caption=text_to_send, parse_mode="Markdown", reply_markup=markup)
-            else: await context.bot.send_message(CHANNEL_ID, text=text_to_send, parse_mode="Markdown", reply_markup=markup)
-            await update.message.reply_text("✅ تم النشر! نسأل الله الشفاء.", reply_markup=MAIN_KEYBOARD)
-
-        elif choice == "🏠 عقارات وسكن (بيع / إيجار)":
-            markup = InlineKeyboardMarkup([[InlineKeyboardButton("✅ موافقة ونشر", callback_data=f"approve_realestate_{user.id}"), InlineKeyboardButton("❌ رفض", callback_data=f"reject_realestate_{user.id}")]])
-            req = f"🏠 *طلب نشر إعلان عقارات وسكن*\nمن: {username}\n\nالتفاصيل:\n{user_text}"
-            if photo_file_id: await context.bot.send_photo(ADMIN_ID, photo_file_id, caption=req, parse_mode="Markdown", reply_markup=markup)
-            else: await context.bot.send_message(ADMIN_ID, text=req, parse_mode="Markdown", reply_markup=markup)
-            await update.message.reply_text("✅ تم الإرسال للإدارة.", reply_markup=MAIN_KEYBOARD)
-
-        elif choice == "➕ أضف عملك":
+        # 1. نظام إرسال الأعمال الخاصة للإدارة بدون نشر
+        if choice == "➕ أضف عملك":
             admin_msg = (
-                f"📌 *طلب إضافة جديد:*\n\n"
+                f"📌 *طلب إضافة عمل جديد:*\n\n"
                 f"- البيانات: {user_text}\n"
                 f"- حساب المرسل: {username}"
             )
-            if photo_file_id:
-                await context.bot.send_photo(chat_id=ADMIN_ID, photo=photo_file_id, caption=admin_msg, parse_mode="Markdown")
-            else:
-                await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg, parse_mode="Markdown")
-            
+            if photo_file_id: await context.bot.send_photo(chat_id=ADMIN_ID, photo=photo_file_id, caption=admin_msg, parse_mode="Markdown")
+            else: await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg, parse_mode="Markdown")
             await update.message.reply_text("✅ تم إرسال بياناتك للإدارة بنجاح! سيتم مراجعتها والتواصل معك قريباً.", reply_markup=MAIN_KEYBOARD)
 
+        # 2. نظام طلبات النشر الموحد في القناة
         else:
-            if choice:
-                text_to_send = f"📢 *{choice}*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
-                if photo_file_id: await context.bot.send_photo(CHANNEL_ID, photo_file_id, caption=text_to_send, parse_mode="Markdown")
-                else: await context.bot.send_message(CHANNEL_ID, text=text_to_send, parse_mode="Markdown")
-                await update.message.reply_text("✅ تم النشر بنجاح!", reply_markup=MAIN_KEYBOARD)
+            action_code = ""
+            action_name = ""
+            
+            if choice == "🚨 إرسال استغاثة / حالة عاجلة":
+                action_code = "sos"
+                action_name = "استغاثة"
+            elif choice == "💼 وظائف خالية":
+                action_code = "job"
+                action_name = "وظيفة"
+            elif choice == "🚕 مشاركة المشاوير والمواصلات":
+                action_code = "ride"
+                action_name = "مواصلة"
+            elif choice == "🩸 التبرع بالدم والطوارئ":
+                action_code = "blood"
+                action_name = "تبرع بالدم"
+            elif choice == "🏠 عقارات وسكن (بيع / إيجار)":
+                action_code = "real"
+                action_name = "إعلان عقارات"
+            elif choice == "📦 أبلغ عن مفقود / أمانة":
+                action_code = "lost"
+                action_name = "مفقودات"
+                
+            if action_code:
+                markup = InlineKeyboardMarkup([[
+                    InlineKeyboardButton("✅ موافقة ونشر", callback_data=f"app_{action_code}_{user.id}"),
+                    InlineKeyboardButton("❌ رفض الطلب", callback_data=f"rej_{action_code}_{user.id}")
+                ]])
+                req = f"🔔 *طلب نشر ({action_name})*\nمن: {username}\n\nالتفاصيل:\n{user_text}"
+                
+                if photo_file_id: await context.bot.send_photo(ADMIN_ID, photo_file_id, caption=req, parse_mode="Markdown", reply_markup=markup)
+                else: await context.bot.send_message(ADMIN_ID, text=req, parse_mode="Markdown", reply_markup=markup)
+                
+                await update.message.reply_text(f"✅ تم إرسال طلب نشر ({action_name}) للإدارة، وسيتم نشره فور الموافقة عليه.", reply_markup=MAIN_KEYBOARD)
             else:
                 await update.message.reply_text("اختر خدمة من القائمة 👇", reply_markup=MAIN_KEYBOARD)
 
@@ -312,51 +303,64 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     admin_msg_text = admin_msg.text or admin_msg.caption or ""
     photo_file_id = admin_msg.photo[-1].file_id if admin_msg.photo else None
     
+    # استخراج اسم المشرف الذي قام بالعملية
+    admin_user = update.effective_user.username or update.effective_user.first_name
+    
     parts = admin_msg_text.split("التفاصيل:\n", 1)
     details = parts[1].strip() if len(parts) > 1 else "تفاصيل غير معروفة"
 
-    # --- Jobs ---
-    if data.startswith("approve_job_"):
+    # --- الرفض الموحد ---
+    if data.startswith("rej_"):
         user_id = data.split("_")[2]
         try:
-            text_to_send = f"💼 *وظائف خالية*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
-            if photo_file_id: await context.bot.send_photo(CHANNEL_ID, photo_file_id, caption=text_to_send, parse_mode="Markdown")
-            else: await context.bot.send_message(CHANNEL_ID, text=text_to_send, parse_mode="Markdown")
-            
-            await context.bot.send_message(chat_id=user_id, text="✅ تم الموافقة على إعلان الوظيفة ونشره!")
-            if photo_file_id: await query.edit_message_caption(caption=f"{admin_msg_text}\n\n✅ **تم النشر.**")
-            else: await query.edit_message_text(text=f"{admin_msg_text}\n\n✅ **تم النشر.**")
-        except Exception as e: logger.error(e)
-            
-    elif data.startswith("reject_job_"):
-        user_id = data.split("_")[2]
-        try:
-            await context.bot.send_message(chat_id=user_id, text="❌ تم رفض إعلان الوظيفة.")
-            if photo_file_id: await query.edit_message_caption(caption=f"{admin_msg_text}\n\n❌ **مرفوض.**")
-            else: await query.edit_message_text(text=f"{admin_msg_text}\n\n❌ **مرفوض.**")
+            await context.bot.send_message(chat_id=user_id, text="❌ نعتذر، تم رفض طلب النشر من قبل الإدارة.")
+            if photo_file_id: await query.edit_message_caption(caption=f"{admin_msg_text}\n\n❌ **تم الرفض بواسطة {admin_user}.**", parse_mode="Markdown")
+            else: await query.edit_message_text(text=f"{admin_msg_text}\n\n❌ **تم الرفض بواسطة {admin_user}.**", parse_mode="Markdown")
         except: pass
+        return
 
-    # --- Real estate ---
-    elif data.startswith("approve_realestate_"):
+    # --- الموافقة والنشر الموحد ---
+    if data.startswith("app_"):
+        action = data.split("_")[1]
         user_id = data.split("_")[2]
-        try:
-            markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع المالك 📞", url=f"tg://user?id={user_id}")]])
+        contact_url = f"tg://user?id={user_id}"
+
+        markup = None
+        if action == "sos":
+            markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع الحالة 🚨", url=contact_url)]])
+            text_to_send = f"🚨 *استغاثة عاجلة*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
+        elif action == "blood":
+            markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع حالة الطوارئ 🩸", url=contact_url)]])
+            text_to_send = f"🚨 *نداء طوارئ عاجل - تبرع بالدم* 🚨\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
+        elif action == "ride":
+            markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع صاحب المشوار 💬", url=contact_url)]])
+            text_to_send = f"🚕 *إعلان مواصلة فوري*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
+        elif action == "lost":
+            markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل للإبلاغ 💬", url=contact_url)]])
+            text_to_send = f"📢 *مفقودات وأمانات*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
+        elif action == "job":
+            text_to_send = f"💼 *وظائف خالية*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
+        elif action == "real":
+            markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع المالك 📞", url=contact_url)]])
             text_to_send = f"🏠 *إعلان عقارات وسكن*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
-            if photo_file_id: await context.bot.send_photo(CHANNEL_ID, photo_file_id, caption=text_to_send, parse_mode="Markdown", reply_markup=markup)
-            else: await context.bot.send_message(CHANNEL_ID, text=text_to_send, parse_mode="Markdown", reply_markup=markup)
-            
-            await context.bot.send_message(chat_id=user_id, text="✅ تم نشر إعلان العقار!")
-            if photo_file_id: await query.edit_message_caption(caption=f"{admin_msg_text}\n\n✅ **تم النشر.**")
-            else: await query.edit_message_text(text=f"{admin_msg_text}\n\n✅ **تم النشر.**")
-        except Exception as e: logger.error(e)
-            
-    elif data.startswith("reject_realestate_"):
-        user_id = data.split("_")[2]
+        else:
+            return
+
         try:
-            await context.bot.send_message(chat_id=user_id, text="❌ تم رفض إعلان العقار.")
-            if photo_file_id: await query.edit_message_caption(caption=f"{admin_msg_text}\n\n❌ **مرفوض.**")
-            else: await query.edit_message_text(text=f"{admin_msg_text}\n\n❌ **مرفوض.**")
-        except: pass
+            if photo_file_id:
+                if markup: await context.bot.send_photo(CHANNEL_ID, photo_file_id, caption=text_to_send, parse_mode="Markdown", reply_markup=markup)
+                else: await context.bot.send_photo(CHANNEL_ID, photo_file_id, caption=text_to_send, parse_mode="Markdown")
+            else:
+                if markup: await context.bot.send_message(CHANNEL_ID, text=text_to_send, parse_mode="Markdown", reply_markup=markup)
+                else: await context.bot.send_message(CHANNEL_ID, text=text_to_send, parse_mode="Markdown")
+            
+            await context.bot.send_message(chat_id=user_id, text="✅ تمت الموافقة على طلبك ونشره في القناة بنجاح!")
+            if photo_file_id: await query.edit_message_caption(caption=f"{admin_msg_text}\n\n✅ **نُشر بواسطة {admin_user}.**", parse_mode="Markdown")
+            else: await query.edit_message_text(text=f"{admin_msg_text}\n\n✅ **نُشر بواسطة {admin_user}.**", parse_mode="Markdown")
+        except Exception as e:
+            logger.error(e)
+            if photo_file_id: await query.edit_message_caption(caption=f"{admin_msg_text}\n\n❌ **حدث خطأ أثناء النشر.**", parse_mode="Markdown")
+            else: await query.edit_message_text(text=f"{admin_msg_text}\n\n❌ **حدث خطأ أثناء النشر.**", parse_mode="Markdown")
 
 # ════════════════════════════════════════════
 #  أوامر الأدمن والأذكار المجدولة
