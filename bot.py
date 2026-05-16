@@ -228,7 +228,8 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 # ════════════════════════════════════════════
 
 async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    user_text = update.message.text
+    user_text = update.message.text or update.message.caption or ""
+    photo_file_id = update.message.photo[-1].file_id if update.message.photo else None
     
     KNOWN_BUTTONS = [
         "🚨 إرسال استغاثة / حالة عاجلة", "🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ",
@@ -257,15 +258,12 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             sos_keyboard = [[InlineKeyboardButton("تواصل مع الحالة 🚨", url=contact_url)]]
             sos_markup = InlineKeyboardMarkup(sos_keyboard)
             
-            await context.bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=f"🚨 *استغاثة عاجلة*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
-                parse_mode="Markdown",
-                reply_markup=sos_markup
-            )
+            text_to_send = f"🚨 *استغاثة عاجلة*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot"
+            if photo_file_id:
+                await context.bot.send_photo(chat_id=CHANNEL_ID, photo=photo_file_id, caption=text_to_send, parse_mode="Markdown", reply_markup=sos_markup)
+            else:
+                await context.bot.send_message(chat_id=CHANNEL_ID, text=text_to_send, parse_mode="Markdown", reply_markup=sos_markup)
             await update.message.reply_text("✅ تم نشر استغاثتك في القناة بنجاح.", reply_markup=MAIN_KEYBOARD)
-
-
 
         elif choice == "💼 وظائف خالية":
             # إرسال للإدارة للموافقة
@@ -283,36 +281,32 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 f"التفاصيل:\n{user_text}"
             )
             
-            await context.bot.send_message(
-                chat_id=ADMIN_ID,
-                text=job_request_text,
-                parse_mode="Markdown",
-                reply_markup=reply_markup
-            )
+            if photo_file_id:
+                await context.bot.send_photo(chat_id=ADMIN_ID, photo=photo_file_id, caption=job_request_text, parse_mode="Markdown", reply_markup=reply_markup)
+            else:
+                await context.bot.send_message(chat_id=ADMIN_ID, text=job_request_text, parse_mode="Markdown", reply_markup=reply_markup)
             await update.message.reply_text("✅ تم استلام طلب نشر الوظيفة وجاري مراجعته من الإدارة.", reply_markup=MAIN_KEYBOARD)
 
         elif choice == "🚕 مشاركة المشاوير والمواصلات":
             ride_keyboard = [[InlineKeyboardButton("تواصل مع صاحب المشوار 💬", url=contact_url)]]
             ride_markup = InlineKeyboardMarkup(ride_keyboard)
             
-            await context.bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=f"🚕 *إعلان مواصلة فوري*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
-                parse_mode="Markdown",
-                reply_markup=ride_markup
-            )
+            text_to_send = f"🚕 *إعلان مواصلة فوري*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot"
+            if photo_file_id:
+                await context.bot.send_photo(chat_id=CHANNEL_ID, photo=photo_file_id, caption=text_to_send, parse_mode="Markdown", reply_markup=ride_markup)
+            else:
+                await context.bot.send_message(chat_id=CHANNEL_ID, text=text_to_send, parse_mode="Markdown", reply_markup=ride_markup)
             await update.message.reply_text("✅ تم نشر إعلان المواصلة في القناة بنجاح!", reply_markup=MAIN_KEYBOARD)
 
         elif choice == "🩸 التبرع بالدم والطوارئ":
             blood_keyboard = [[InlineKeyboardButton("تواصل مع حالة الطوارئ 🩸", url=contact_url)]]
             blood_markup = InlineKeyboardMarkup(blood_keyboard)
             
-            await context.bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=f"🚨 *نداء طوارئ عاجل - تبرع بالدم* 🚨\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
-                parse_mode="Markdown",
-                reply_markup=blood_markup
-            )
+            text_to_send = f"🚨 *نداء طوارئ عاجل - تبرع بالدم* 🚨\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot"
+            if photo_file_id:
+                await context.bot.send_photo(chat_id=CHANNEL_ID, photo=photo_file_id, caption=text_to_send, parse_mode="Markdown", reply_markup=blood_markup)
+            else:
+                await context.bot.send_message(chat_id=CHANNEL_ID, text=text_to_send, parse_mode="Markdown", reply_markup=blood_markup)
             await update.message.reply_text("✅ تم نشر حالة الطوارئ في القناة بنجاح! نسأل الله الشفاء العاجل.", reply_markup=MAIN_KEYBOARD)
 
         elif choice == "🏠 عقارات وسكن (بيع / إيجار)":
@@ -331,22 +325,20 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 f"التفاصيل:\n{user_text}"
             )
             
-            await context.bot.send_message(
-                chat_id=ADMIN_ID,
-                text=realestate_request_text,
-                parse_mode="Markdown",
-                reply_markup=reply_markup
-            )
+            if photo_file_id:
+                await context.bot.send_photo(chat_id=ADMIN_ID, photo=photo_file_id, caption=realestate_request_text, parse_mode="Markdown", reply_markup=reply_markup)
+            else:
+                await context.bot.send_message(chat_id=ADMIN_ID, text=realestate_request_text, parse_mode="Markdown", reply_markup=reply_markup)
             await update.message.reply_text("✅ تم استلام إعلان العقار وجاري مراجعته من الإدارة قبل النشر.", reply_markup=MAIN_KEYBOARD)
 
         else:
             # خدمات تنشر مباشرة للقناة (مثل المفقودات)
             if choice:
-                await context.bot.send_message(
-                    chat_id=CHANNEL_ID,
-                    text=f"📢 *{choice}*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
-                    parse_mode="Markdown",
-                )
+                text_to_send = f"📢 *{choice}*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot"
+                if photo_file_id:
+                    await context.bot.send_photo(chat_id=CHANNEL_ID, photo=photo_file_id, caption=text_to_send, parse_mode="Markdown")
+                else:
+                    await context.bot.send_message(chat_id=CHANNEL_ID, text=text_to_send, parse_mode="Markdown")
                 await update.message.reply_text("✅ تم استقبال بياناتك ونشرها بنجاح! شكراً لك.", reply_markup=MAIN_KEYBOARD)
             else:
                 await update.message.reply_text("اختر خدمة من القائمة 👇", reply_markup=MAIN_KEYBOARD)
@@ -367,7 +359,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await query.answer()
     
     data = query.data
-    admin_msg_text = query.message.text
+    admin_msg = query.message
+    admin_msg_text = admin_msg.text or admin_msg.caption or ""
+    photo_file_id = admin_msg.photo[-1].file_id if admin_msg.photo else None
     
     parts = admin_msg_text.split("التفاصيل:\n", 1)
     if len(parts) > 1:
@@ -378,11 +372,12 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if data.startswith("approve_job_"):
         user_id = data.split("_")[2]
         try:
-            await context.bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=f"💼 *وظائف خالية*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
-                parse_mode="Markdown",
-            )
+            text_to_send = f"💼 *وظائف خالية*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot"
+            if photo_file_id:
+                await context.bot.send_photo(chat_id=CHANNEL_ID, photo=photo_file_id, caption=text_to_send, parse_mode="Markdown")
+            else:
+                await context.bot.send_message(chat_id=CHANNEL_ID, text=text_to_send, parse_mode="Markdown")
+            
             await context.bot.send_message(chat_id=user_id, text="✅ تم الموافقة على إعلان الوظيفة ونشره في القناة!")
             await query.edit_message_text(text=f"{admin_msg_text}\n\n✅ **تمت الموافقة والنشر.**")
         except Exception as e:
@@ -404,12 +399,12 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             real_estate_keyboard = [[InlineKeyboardButton("تواصل مع صاحب العقار 📞", url=f"tg://user?id={user_id}")]]
             real_estate_markup = InlineKeyboardMarkup(real_estate_keyboard)
             
-            await context.bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=f"🏠 *إعلان عقارات وسكن*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
-                parse_mode="Markdown",
-                reply_markup=real_estate_markup
-            )
+            text_to_send = f"🏠 *إعلان عقارات وسكن*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot"
+            if photo_file_id:
+                await context.bot.send_photo(chat_id=CHANNEL_ID, photo=photo_file_id, caption=text_to_send, parse_mode="Markdown", reply_markup=real_estate_markup)
+            else:
+                await context.bot.send_message(chat_id=CHANNEL_ID, text=text_to_send, parse_mode="Markdown", reply_markup=real_estate_markup)
+            
             await context.bot.send_message(chat_id=user_id, text="✅ تم الموافقة على إعلان العقار ونشره في القناة!")
             await query.edit_message_text(text=f"{admin_msg_text}\n\n✅ **تمت الموافقة والنشر.**")
         except Exception as e:
@@ -501,7 +496,7 @@ def main():
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_choice)
         ],
         states={
-            TYPING_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_input)],
+            TYPING_INPUT: [MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, process_input)],
         },
         fallbacks=[CommandHandler("start", start)],
     )
