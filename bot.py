@@ -2,7 +2,6 @@ import logging
 import sqlite3
 import asyncio
 import datetime
-import re
 from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -21,8 +20,6 @@ CHANNEL_ID = "@AlBalashon_Channel"
 
 # ─── مراحل المحادثة ──────────────────────────
 TYPING_INPUT = 1
-WAITING_BIZ_NAME = 2
-WAITING_BIZ_DETAILS = 3
 
 # ─── نصوص ثابتة (يمكنك تعديلها لاحقاً) ────────
 DOCTORS_TEXT = (
@@ -65,23 +62,24 @@ STAR_METAL_TEXT = (
     "📞 *رقم التواصل:* 01014770786"
 )
 
-# ─── لوحات المفاتيح الرئيسية ──────────────────────────
+# ─── لوحات المفاتيح ──────────────────────────
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
     [
         ["🚨 إرسال استغاثة / حالة عاجلة"],
         ["🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ"],
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
-        ["🛠️ الخدمات"]
+        ["🛠️ الخدمات", "🩺 دليل الأطباء والعيادات"],
+        ["➕ أضف عملك"]
     ],
     resize_keyboard=True,
 )
 
 SERVICES_KEYBOARD = ReplyKeyboardMarkup(
     [
-        ["➕ أضف عملك"],
-        ["🩺 أطباء", "🛠️ صنايعية", "🏢 معارض ومحلات"],
-        ["📦 خدمات الشحن والتوصيل", "🏠 عقارات وسكن"],
+        ["📦 خدمات الشحن والتوصيل (الطيارين)"],
+        ["🏠 عقارات وسكن (بيع / إيجار)"],
+        ["🪟 معرض استار ميتال للألوميتال"],
         ["🔙 رجوع للقائمة الرئيسية"]
     ],
     resize_keyboard=True,
@@ -100,14 +98,6 @@ logger = logging.getLogger(__name__)
 def init_db():
     conn = sqlite3.connect("albalashon.db")
     conn.execute("CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY)")
-    conn.execute("CREATE TABLE IF NOT EXISTS banned_users (user_id INTEGER PRIMARY KEY)")
-    conn.execute('''CREATE TABLE IF NOT EXISTS businesses (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    category TEXT,
-                    name TEXT,
-                    details TEXT,
-                    user_id INTEGER
-                )''')
     conn.commit()
     conn.close()
 
@@ -116,25 +106,6 @@ def register_user(user_id: int):
     conn.execute("INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,))
     conn.commit()
     conn.close()
-
-def add_business(category: str, name: str, details: str, user_id: int):
-    conn = sqlite3.connect("albalashon.db")
-    conn.execute("INSERT INTO businesses (category, name, details, user_id) VALUES (?, ?, ?, ?)",
-                 (category, name, details, user_id))
-    conn.commit()
-    conn.close()
-
-def get_businesses(category: str):
-    conn = sqlite3.connect("albalashon.db")
-    rows = conn.execute("SELECT name, details FROM businesses WHERE category = ?", (category,)).fetchall()
-    conn.close()
-    return rows
-
-def get_business_by_name(name: str):
-    conn = sqlite3.connect("albalashon.db")
-    row = conn.execute("SELECT details FROM businesses WHERE name = ?", (name,)).fetchone()
-    conn.close()
-    return row[0] if row else None
 
 def get_all_user_ids() -> list:
     conn = sqlite3.connect("albalashon.db")
@@ -147,29 +118,6 @@ def get_user_count() -> int:
     count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
     conn.close()
     return count
-
-# Helper to build dynamic keyboard
-def build_category_keyboard(category: str):
-    businesses = get_businesses(category)
-    buttons = []
-    
-    # Add static items
-    if category == "doctors":
-        buttons.append(["🩺 القائمة الأساسية للأطباء"])
-    elif category == "shops":
-        buttons.append(["🪟 معرض استار ميتال للألوميتال"])
-        
-    row = []
-    for (name, _) in businesses:
-        row.append(name)
-        if len(row) == 2:
-            buttons.append(row)
-            row = []
-    if row:
-        buttons.append(row)
-        
-    buttons.append(["🔙 رجوع للقائمة الرئيسية"])
-    return ReplyKeyboardMarkup(buttons, resize_keyboard=True)
 
 # ════════════════════════════════════════════
 #  /start
@@ -190,12 +138,6 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     text = update.message.text
     context.user_data["choice"] = text
 
-    # Check if it's a dynamic business button
-    biz_details = get_business_by_name(text)
-    if biz_details:
-        await update.message.reply_text(f"✨ *{text}*\n\n{biz_details}", parse_mode="Markdown")
-        return ConversationHandler.END
-
     if text == "🔙 رجوع للقائمة الرئيسية":
         await update.message.reply_text("القائمة الرئيسية:", reply_markup=MAIN_KEYBOARD)
         return ConversationHandler.END
@@ -204,24 +146,10 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text("اختر الخدمة المطلوبة من القائمة:", reply_markup=SERVICES_KEYBOARD)
         return ConversationHandler.END
 
-    # --- القوائم الثابتة الديناميكية ---
-    if text == "🩺 أطباء":
-        await update.message.reply_text("اختر الطبيب من القائمة:", reply_markup=build_category_keyboard("doctors"))
-        return ConversationHandler.END
-        
-    elif text == "🩺 القائمة الأساسية للأطباء":
+    if text == "🩺 دليل الأطباء والعيادات":
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
         
-    elif text == "🛠️ صنايعية":
-        kb = build_category_keyboard("craftsmen")
-        await update.message.reply_text("اختر الحرفة من القائمة:", reply_markup=kb)
-        return ConversationHandler.END
-        
-    elif text == "🏢 معارض ومحلات":
-        await update.message.reply_text("اختر المعرض أو المحل من القائمة:", reply_markup=build_category_keyboard("shops"))
-        return ConversationHandler.END
-
     elif text == "🪟 معرض استار ميتال للألوميتال":
         contact_keyboard = [[InlineKeyboardButton("تواصل عبر واتساب 💬", url="https://wa.me/201014770786")]]
         contact_markup = InlineKeyboardMarkup(contact_keyboard)
@@ -232,7 +160,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text(EMERGENCY_PHARMACY_INFO, parse_mode="Markdown")
         return ConversationHandler.END
         
-    elif text == "📦 خدمات الشحن والتوصيل":
+    elif text == "📦 خدمات الشحن والتوصيل (الطيارين)":
         await update.message.reply_text(DELIVERY_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
 
@@ -247,13 +175,8 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     # --- إضافة عمل ---
     elif text == "➕ أضف عملك":
-        keyboard = [
-            [InlineKeyboardButton("🩺 أطباء", callback_data="addbiz_doctors")],
-            [InlineKeyboardButton("🛠️ صنايعية", callback_data="addbiz_craftsmen")],
-            [InlineKeyboardButton("🏢 معارض ومحلات", callback_data="addbiz_shops")]
-        ]
-        await update.message.reply_text("الرجاء اختيار القسم الذي ترغب بإضافة عملك إليه:", reply_markup=InlineKeyboardMarkup(keyboard))
-        return ConversationHandler.END
+        await update.message.reply_text("الرجاء كتابة بيانات عملك في رسالة واحدة (الاسم، التخصص الدقيق، رقم التليفون، العنوان):")
+        return TYPING_INPUT
 
     # --- الردود التي تتطلب إدخال بيانات ---
     elif text == "🩸 التبرع بالدم والطوارئ":
@@ -276,7 +199,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text("🚕 اكتب تفاصيل مشوارك (سواق ولا راكب، والميعاد):")
         return TYPING_INPUT
         
-    elif text == "🏠 عقارات وسكن":
+    elif text == "🏠 عقارات وسكن (بيع / إيجار)":
         await update.message.reply_text("🏠 اكتب تفاصيل العقار (بيع/إيجار، السعر، والمواصفات):")
         return TYPING_INPUT
 
@@ -286,70 +209,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
 # ════════════════════════════════════════════
-#  معالجات إضافة عمل جديد (Add Business)
-# ════════════════════════════════════════════
-async def handle_addbiz_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    cat = query.data.split("_")[1]
-    context.user_data["biz_category"] = cat
-    await query.message.reply_text(
-        "الآن أرسل لي **اسم العمل أو الشخص** (مثال: دكتور محمد حسني، أو معرض الأمانة)، ليكون اسم الزر الخاص بك في القائمة:",
-        parse_mode="Markdown"
-    )
-    return WAITING_BIZ_NAME
-
-async def wait_biz_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    name = update.message.text
-    if name in ["🔙 رجوع للقائمة الرئيسية"]:
-        await update.message.reply_text("تم الإلغاء.", reply_markup=MAIN_KEYBOARD)
-        context.user_data.clear()
-        return ConversationHandler.END
-        
-    context.user_data["biz_name"] = name
-    await update.message.reply_text("ممتاز! الآن أرسل تفاصيل العمل (التخصص الدقيق، أرقام التليفونات، العنوان والمواعيد). يمكنك أيضاً إرفاق صورة مع التفاصيل كـ Caption:")
-    return WAITING_BIZ_DETAILS
-
-async def wait_biz_details(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    details = update.message.text or update.message.caption or ""
-    photo = update.message.photo[-1].file_id if update.message.photo else None
-    
-    if details in ["🔙 رجوع للقائمة الرئيسية"]:
-        await update.message.reply_text("تم الإلغاء.", reply_markup=MAIN_KEYBOARD)
-        context.user_data.clear()
-        return ConversationHandler.END
-        
-    name = context.user_data.get("biz_name")
-    category = context.user_data.get("biz_category")
-    user = update.effective_user
-    
-    keyboard = [
-        [
-            InlineKeyboardButton("✅ موافقة وإضافة للدليل", callback_data=f"appbiz_{category}_{user.id}"),
-            InlineKeyboardButton("❌ رفض", callback_data=f"rejbiz_{user.id}")
-        ]
-    ]
-    
-    admin_text = (
-        f"📝 *طلب إضافة عمل جديد للدليل*\n"
-        f"القسم: {category}\n"
-        f"الاسم: {name}\n"
-        f"من: @{user.username or user.id}\n\n"
-        f"التفاصيل:\n{details}"
-    )
-    
-    if photo:
-        await context.bot.send_photo(chat_id=ADMIN_ID, photo=photo, caption=admin_text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
-    else:
-        await context.bot.send_message(chat_id=ADMIN_ID, text=admin_text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
-        
-    await update.message.reply_text("✅ تم إرسال طلبك للإدارة للمراجعة. سيتم إضافته للدليل قريباً كزر ثابت!", reply_markup=MAIN_KEYBOARD)
-    context.user_data.clear()
-    return ConversationHandler.END
-
-
-# ════════════════════════════════════════════
-#  معالج النص المُدخَل للخدمات الأخرى
+#  معالج النص المُدخَل
 # ════════════════════════════════════════════
 async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_text = update.message.text or update.message.caption or ""
@@ -362,8 +222,9 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     KNOWN = ["🚨 إرسال استغاثة / حالة عاجلة", "🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ",
              "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", "🚕 مشاركة المشاوير والمواصلات",
-             "💼 وظائف خالية", "🛠️ الخدمات", "🩺 أطباء", "🛠️ صنايعية", "🏢 معارض ومحلات", "📦 خدمات الشحن والتوصيل",
-             "🏠 عقارات وسكن", "➕ أضف عملك"]
+             "💼 وظائف خالية", "🛠️ الخدمات", "🩺 دليل الأطباء والعيادات", "🪟 معرض استار ميتال للألوميتال",
+             "📦 خدمات الشحن والتوصيل (الطيارين)", "🏠 عقارات وسكن (بيع / إيجار)", "➕ أضف عملك"]
+             
     if user_text in KNOWN:
         context.user_data.clear()
         return await handle_choice(update, context)
@@ -402,12 +263,25 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             else: await context.bot.send_message(CHANNEL_ID, text=text_to_send, parse_mode="Markdown", reply_markup=markup)
             await update.message.reply_text("✅ تم النشر! نسأل الله الشفاء.", reply_markup=MAIN_KEYBOARD)
 
-        elif choice == "🏠 عقارات وسكن":
+        elif choice == "🏠 عقارات وسكن (بيع / إيجار)":
             markup = InlineKeyboardMarkup([[InlineKeyboardButton("✅ موافقة ونشر", callback_data=f"approve_realestate_{user.id}"), InlineKeyboardButton("❌ رفض", callback_data=f"reject_realestate_{user.id}")]])
             req = f"🏠 *طلب نشر إعلان عقارات وسكن*\nمن: {username}\n\nالتفاصيل:\n{user_text}"
             if photo_file_id: await context.bot.send_photo(ADMIN_ID, photo_file_id, caption=req, parse_mode="Markdown", reply_markup=markup)
             else: await context.bot.send_message(ADMIN_ID, text=req, parse_mode="Markdown", reply_markup=markup)
             await update.message.reply_text("✅ تم الإرسال للإدارة.", reply_markup=MAIN_KEYBOARD)
+
+        elif choice == "➕ أضف عملك":
+            admin_msg = (
+                f"📌 *طلب إضافة جديد:*\n\n"
+                f"- البيانات: {user_text}\n"
+                f"- حساب المرسل: {username}"
+            )
+            if photo_file_id:
+                await context.bot.send_photo(chat_id=ADMIN_ID, photo=photo_file_id, caption=admin_msg, parse_mode="Markdown")
+            else:
+                await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg, parse_mode="Markdown")
+            
+            await update.message.reply_text("✅ تم إرسال بياناتك للإدارة بنجاح! سيتم مراجعتها والتواصل معك قريباً.", reply_markup=MAIN_KEYBOARD)
 
         else:
             if choice:
@@ -441,36 +315,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     parts = admin_msg_text.split("التفاصيل:\n", 1)
     details = parts[1].strip() if len(parts) > 1 else "تفاصيل غير معروفة"
 
-    # --- Add Biz Admin Approval ---
-    if data.startswith("appbiz_"):
-        parts_data = data.split("_")
-        category = parts_data[1]
-        user_id = parts_data[2]
-        
-        name_match = re.search(r"الاسم:\s*(.+)", admin_msg_text)
-        biz_name = name_match.group(1).strip() if name_match else "بدون اسم"
-        
-        try:
-            add_business(category, biz_name, details, int(user_id))
-            await context.bot.send_message(chat_id=user_id, text=f"✅ تمت الموافقة على إضافة عملك ({biz_name}) وهو الآن يظهر كزر ثابت في القسم الخاص به بالبوت!")
-            if photo_file_id:
-                await query.edit_message_caption(caption=f"{admin_msg_text}\n\n✅ **تمت الإضافة للقاعدة كزر ثابت.**", parse_mode="Markdown")
-            else:
-                await query.edit_message_text(text=f"{admin_msg_text}\n\n✅ **تمت الإضافة للقاعدة كزر ثابت.**", parse_mode="Markdown")
-        except Exception as e:
-            logger.error("Error saving business: %s", e)
-            
-    elif data.startswith("rejbiz_"):
-        user_id = data.split("_")[2] # rejbiz_userid -> wait, I used rejbiz_{user.id}, so it's split("_")[1]
-        user_id = data.split("_")[1]
-        try:
-            await context.bot.send_message(chat_id=user_id, text="❌ تم رفض طلب الإضافة من قبل الإدارة.")
-            if photo_file_id: await query.edit_message_caption(caption=f"{admin_msg_text}\n\n❌ **مرفوض.**")
-            else: await query.edit_message_text(text=f"{admin_msg_text}\n\n❌ **مرفوض.**")
-        except: pass
-
     # --- Jobs ---
-    elif data.startswith("approve_job_"):
+    if data.startswith("approve_job_"):
         user_id = data.split("_")[2]
         try:
             text_to_send = f"💼 *وظائف خالية*\n\n{details}\n\n🤖 للتواصل عبر البوت: @AlBalashon_services_bot"
@@ -562,12 +408,9 @@ def main():
         entry_points=[
             CommandHandler("start", start),
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_choice),
-            CallbackQueryHandler(handle_addbiz_callback, pattern="^addbiz_")
         ],
         states={
             TYPING_INPUT: [MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, process_input)],
-            WAITING_BIZ_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, wait_biz_name)],
-            WAITING_BIZ_DETAILS: [MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, wait_biz_details)],
         },
         fallbacks=[CommandHandler("start", start)],
     )
