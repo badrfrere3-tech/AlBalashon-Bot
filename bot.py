@@ -63,6 +63,8 @@ STAR_METAL_TEXT = (
     "📞 *رقم التواصل:* 01014770786"
 )
 
+TUKTUK_TEXT = "⏳ *هذه الميزة ستتوفر قريباً...*"
+
 # ─── لوحات المفاتيح ──────────────────────────
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
     [
@@ -71,7 +73,7 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
         ["🛠️ الخدمات", "🩺 دليل الأطباء والعيادات"],
-        ["➕ أضف عملك"]
+        ["➕ أضف عملك", "🛺 اطلب توك توك"]
     ],
     resize_keyboard=True,
 )
@@ -147,8 +149,12 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text("اختر الخدمة المطلوبة من القائمة:", reply_markup=SERVICES_KEYBOARD)
         return ConversationHandler.END
 
-    if text == "🩺 دليل الأطباء والعيادات":
+    if "دليل الأطباء" in text:
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown")
+        return ConversationHandler.END
+        
+    if "توك توك" in text:
+        await update.message.reply_text(TUKTUK_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
         
     elif text == "🪟 معرض استار ميتال للألوميتال":
@@ -226,7 +232,8 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     KNOWN = ["🚨 إرسال استغاثة / حالة عاجلة", "🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ",
              "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", "🚕 مشاركة المشاوير والمواصلات",
              "💼 وظائف خالية", "🛠️ الخدمات", "🩺 دليل الأطباء والعيادات", "🪟 معرض استار ميتال للألوميتال",
-             "📦 خدمات الشحن والتوصيل (الطيارين)", "🏠 عقارات وسكن (بيع / إيجار)", "➕ أضف عملك"]
+             "📦 خدمات الشحن والتوصيل (الطيارين)", "🏠 عقارات وسكن (بيع / إيجار)", "➕ أضف عملك",
+             "🛺 اطلب توك توك"]
              
     if user_text in KNOWN:
         context.user_data.clear()
@@ -238,7 +245,7 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     try:
         # 1. نظام إرسال الأعمال الخاصة للإدارة بدون نشر
-        if choice == "➕ أضف عملك":
+        if "أضف عملك" in choice:
             admin_msg = (
                 f"📌 *طلب إضافة عمل جديد:*\n\n"
                 f"- البيانات: {user_text}\n"
@@ -253,22 +260,22 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             action_code = ""
             action_name = ""
             
-            if choice == "🚨 إرسال استغاثة / حالة عاجلة":
+            if "استغاثة" in choice:
                 action_code = "sos"
                 action_name = "استغاثة"
-            elif choice == "💼 وظائف خالية":
+            elif "وظائف" in choice:
                 action_code = "job"
                 action_name = "وظيفة"
-            elif choice == "🚕 مشاركة المشاوير والمواصلات":
+            elif "مشاركة المشاوير" in choice or "المواصلات" in choice:
                 action_code = "ride"
                 action_name = "مواصلة"
-            elif choice == "🩸 التبرع بالدم والطوارئ":
+            elif "التبرع بالدم" in choice:
                 action_code = "blood"
                 action_name = "تبرع بالدم"
-            elif choice == "🏠 عقارات وسكن (بيع / إيجار)":
+            elif "عقارات" in choice:
                 action_code = "real"
                 action_name = "إعلان عقارات"
-            elif choice == "📦 أبلغ عن مفقود / أمانة":
+            elif "مفقود" in choice or "أمانة" in choice:
                 action_code = "lost"
                 action_name = "مفقودات"
                 
@@ -421,7 +428,9 @@ def main():
             TYPING_INPUT: [MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, process_input)],
         },
         fallbacks=[CommandHandler("start", start)],
-        allow_reentry=True
+        allow_reentry=True,
+        name="main_conversation",
+        persistent=True
     )
 
     app.add_handler(conv_handler)
