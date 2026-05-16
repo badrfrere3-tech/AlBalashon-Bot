@@ -31,7 +31,7 @@ def is_profane(text: str) -> bool:
     return False
 
 # ─── مراحل المحادثة ──────────────────────────
-CHOOSING, TYPING_INPUT = range(2)
+TYPING_INPUT = 1
 
 # ─── نصوص ثابتة (يمكنك تعديلها لاحقاً) ────────
 DOCTORS_TEXT = (
@@ -143,7 +143,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "💡 مرحباً بك في منصة خدمات البلاشون الذكية.\nاختر الخدمة المطلوبة من الأزرار بالأسفل:",
         reply_markup=MAIN_KEYBOARD,
     )
-    return CHOOSING
+    return ConversationHandler.END
 
 # ════════════════════════════════════════════
 #  مساعد للحظر التلقائي
@@ -180,39 +180,39 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     # --- القائمة الرئيسية (نصوص مباشرة) ---
     if text == "🩺 دليل الأطباء والعيادات":
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown")
-        return CHOOSING
+        return ConversationHandler.END
         
     elif text == "🏥 صيدليات الطوارئ الليلة":
         await update.message.reply_text(EMERGENCY_PHARMACY_INFO, parse_mode="Markdown")
-        return CHOOSING
+        return ConversationHandler.END
         
     elif text == "🛠️ الخدمات":
         await update.message.reply_text("اختر الخدمة المطلوبة من القائمة:", reply_markup=SERVICES_KEYBOARD)
-        return CHOOSING
+        return ConversationHandler.END
         
     elif text == "🔙 رجوع للقائمة الرئيسية":
         await update.message.reply_text("القائمة الرئيسية:", reply_markup=MAIN_KEYBOARD)
-        return CHOOSING
+        return ConversationHandler.END
 
     # --- القائمة الفرعية (الخدمات - نصوص مباشرة) ---
     elif text == "كهربائي":
         await update.message.reply_text(ELEC_TEXT, parse_mode="Markdown")
-        return CHOOSING
+        return ConversationHandler.END
     elif text == "سباك":
         await update.message.reply_text(PLUMB_TEXT, parse_mode="Markdown")
-        return CHOOSING
+        return ConversationHandler.END
     elif text == "نجار":
         await update.message.reply_text(CARP_TEXT, parse_mode="Markdown")
-        return CHOOSING
+        return ConversationHandler.END
     elif text == "صيانة أجهزة":
         await update.message.reply_text(APPL_TEXT, parse_mode="Markdown")
-        return CHOOSING
+        return ConversationHandler.END
     elif text == "👨‍🔧 ميكانيكي وصيانة أعطال":
         await update.message.reply_text(MECH_TEXT, parse_mode="Markdown")
-        return CHOOSING
+        return ConversationHandler.END
     elif text == "📦 خدمات الشحن والتوصيل (الطيارين)":
         await update.message.reply_text(DELIVERY_TEXT, parse_mode="Markdown")
-        return CHOOSING
+        return ConversationHandler.END
 
     # --- القائمة الرئيسية (إعلانات وروابط) ---
     elif text == "📢 إعلان منتج / خدماتنا":
@@ -222,7 +222,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             "مرحباً بك في قسم الإعلانات والخدمات. للتواصل مع الإدارة وحجز مساحة إعلانية لمنتجك أو محلك جوه البوت والقناة، يرجى التواصل معنا عبر الواتساب",
             reply_markup=reply_markup
         )
-        return CHOOSING
+        return ConversationHandler.END
 
     # --- الردود التي تتطلب إدخال بيانات من المستخدم ---
     elif text == "🩸 التبرع بالدم والطوارئ":
@@ -266,10 +266,9 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return TYPING_INPUT
 
     else:
-        # نص غير معروف، أعد القائمة الحالية (سواء رئيسية أو فرعية)
-        # لتسهيل الأمر سنعيد القائمة الرئيسية
+        # نص غير معروف أو رسالة عادية
         await update.message.reply_text("اختر خدمة من القائمة 👇", reply_markup=MAIN_KEYBOARD)
-        return CHOOSING
+        return ConversationHandler.END
 
 # ════════════════════════════════════════════
 #  معالج النص المُدخَل بعد اختيار الخدمة
@@ -279,6 +278,12 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     user_text = update.message.text
     
     if await check_and_ban(user_text, update, context):
+        return ConversationHandler.END
+        
+    # إذا ضغط المستخدم على زر "رجوع" وهو داخل وضع الإدخال (TYPING_INPUT)
+    if user_text == "🔙 رجوع للقائمة الرئيسية":
+        context.user_data.clear()
+        await update.message.reply_text("القائمة الرئيسية:", reply_markup=MAIN_KEYBOARD)
         return ConversationHandler.END
 
     choice    = context.user_data.get("choice", "")
@@ -355,24 +360,26 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 parse_mode="Markdown",
                 reply_markup=real_estate_markup
             )
-            # بما أنه كان في قائمة الخدمات، نرجعه لها أو للرئيسية. القائمة الرئيسية أفضل بعد إتمام عملية
             await update.message.reply_text("✅ تم نشر إعلان العقار في القناة بنجاح!", reply_markup=MAIN_KEYBOARD)
 
         else:
             # خدمات تنشر مباشرة للقناة (مثل المفقودات)
-            await context.bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=f"📢 *{choice}*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
-                parse_mode="Markdown",
-            )
-            await update.message.reply_text("✅ تم استقبال بياناتك ونشرها بنجاح! شكراً لك.", reply_markup=MAIN_KEYBOARD)
+            if choice:
+                await context.bot.send_message(
+                    chat_id=CHANNEL_ID,
+                    text=f"📢 *{choice}*\n\n{user_text}\n\n🤖 للتواصل عبر البوت: @AlBalashon\\_services\\_bot",
+                    parse_mode="Markdown",
+                )
+                await update.message.reply_text("✅ تم استقبال بياناتك ونشرها بنجاح! شكراً لك.", reply_markup=MAIN_KEYBOARD)
+            else:
+                await update.message.reply_text("اختر خدمة من القائمة 👇", reply_markup=MAIN_KEYBOARD)
 
     except Exception as e:
         logger.error("process_input error: %s", e)
         await update.message.reply_text("❌ حدث خطأ أثناء الإرسال. تأكد أن البوت مشرف في القناة.", reply_markup=MAIN_KEYBOARD)
 
     context.user_data.clear()
-    return CHOOSING
+    return ConversationHandler.END
 
 # ════════════════════════════════════════════
 #  معالج الأزرار الإنلاين (موافقة أو رفض الوظائف)
@@ -481,10 +488,13 @@ def main():
     t = datetime.time(hour=6, minute=0, tzinfo=tz)
     app.job_queue.run_daily(send_daily_azkar, time=t)
 
+    # لاحظ التغيير الجذري هنا لحل مشكلة التعليق في القوائم
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
+        entry_points=[
+            CommandHandler("start", start),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_choice)
+        ],
         states={
-            CHOOSING:     [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_choice)],
             TYPING_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_input)],
         },
         fallbacks=[CommandHandler("start", start)],
