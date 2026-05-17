@@ -36,15 +36,25 @@ DOCTORS_TEXT = (
     "👨‍⚕️ د. أحمد صلاح\n"
     "📍 أعلى صيدلية دكتور شكري\n"
     "⏰ الإثنين للخميس (4:00 لـ 8:00 مساءً)\n\n"
-    "👂 *الأنف والأذن والحنجرة:*\n"
-    "👨‍⚕️ د. أحمد طارق مصطفى\n"
-    "📍 أعلى صيدلية خطاب\n\n"
+    "👂 *الأنف والأذن والحنجرة وتجميل الأنف:*\n"
+    "👨‍⚕️ د. أحمد مصطفى خطاب (إستشاري)\n"
+    "📍 الطريق الرئيسي - أعلى صيدلية خطاب\n"
+    "⏰ السبت، الإثنين، الأربعاء (5 - 9 مساءً)\n"
+    "⏰ الأحد، الثلاثاء، الخميس (3 - 5 مساءً)\n"
+    "📞 للتواصل: 01022007977\n\n"
+    "💧 *مسالك بولية:*\n"
+    "👨‍⚕️ د. أسامة الجندي\n"
+    "⏰ يومياً (5:00 لـ 11:00 مساءً) عدا الجمعة\n\n"
     "🔬 *الجلدية:*\n"
     "👨‍⚕️ د. عبد الرحمن\n"
     "📍 عمارة الأطباء\n\n"
     "🔪 *الجراحة العامة:*\n"
     "👨‍⚕️ د. إسلام جمال هندي\n"
-    "⏰ كل يوم عدا الإثنين (5:00 لـ 10:00 مساءً)\n"
+    "⏰ كل يوم عدا الإثنين (5:00 لـ 10:00 مساءً)\n\n"
+    "🚨 *طوارئ (24 ساعة):*\n"
+    "👨‍⚕️ د. عبد الله نبيل\n"
+    "📞 هاتفياً: 01130396842\n"
+    "💬 واتساب: 01069431963\n"
 )
 
 EMERGENCY_PHARMACY_INFO = (
@@ -195,7 +205,11 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
     if "دليل الأطباء" in text:
-        await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown")
+        doctors_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💬 تواصل مع د. خطاب (واتساب)", url="https://wa.me/201022007977")],
+            [InlineKeyboardButton("💬 طوارئ د. عبدالله (واتساب)", url="https://wa.me/201069431963")]
+        ])
+        await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown", reply_markup=doctors_markup)
         return ConversationHandler.END
         
     if "توك توك" in text:
