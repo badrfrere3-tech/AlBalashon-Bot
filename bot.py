@@ -70,11 +70,37 @@ STAR_METAL_TEXT = (
 
 TUKTUK_TEXT = "⏳ *هذه الميزة ستتوفر قريباً...*"
 
+RESTAURANTS_TEXT = (
+    "🍔 *قائمة المطاعم بالبلاشون:*\n\n"
+    "🍕 *مطعم أبو صلاح*\n"
+    "▪️ *نوع الأكل:* بيتزا - كريب - برجر\n"
+    "📞 *رقم التواصل:* 01030666675\n\n"
+    "🍔 *مطعم أبو حنين*\n"
+    "📍 *العنوان:* حفنا\n"
+    "▪️ *نوع الأكل:* برجر - كريب\n"
+    "📞 *رقم التواصل:* 01009751224\n\n"
+    "🍟 *مطعم Viva Food*\n"
+    "📍 *العنوان:* البلاشون\n"
+    "▪️ *نوع الأكل:* كريب\n"
+    "📞 *رقم التواصل:* 01094318213\n\n"
+    "🥩 *مطعم أحمد*\n"
+    "📍 *العنوان:* البلاشون\n"
+    "▪️ *نوع الأكل:* مشويات - حواوشي\n"
+    "📞 *أرقام التواصل:*\n"
+    "📱 01006586263\n"
+    "☎️ 0552805570"
+)
+
+PITCH_TEXT = (
+    "🏟️ *ملعب البلاشون الخماسي*\n\n"
+    "👤 *المسؤول عن الحجز:* أبو كريم\n"
+    "📞 *رقم التواصل:* 01020840251"
+)
+
 # ─── لوحات المفاتيح ──────────────────────────
 MAIN_KEYBOARD = ReplyKeyboardMarkup(
     [
-        ["🚨 إرسال استغاثة / حالة عاجلة"],
-        ["🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ"],
+        ["🚨 حالات عاجلة"],
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
         ["🛠️ الخدمات", "🩺 دليل الأطباء والعيادات"],
@@ -83,8 +109,18 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
     resize_keyboard=True,
 )
 
+URGENT_KEYBOARD = ReplyKeyboardMarkup(
+    [
+        ["🤝 طلب مساعدة"],
+        ["🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ"],
+        ["🔙 رجوع للقائمة الرئيسية"]
+    ],
+    resize_keyboard=True,
+)
+
 SERVICES_KEYBOARD = ReplyKeyboardMarkup(
     [
+        ["🏟️ حجز ملعب البلاشون", "🍔 مطاعم"],
         ["📦 خدمات الشحن والتوصيل (الطيارين)"],
         ["🏠 عقارات وسكن (بيع / إيجار)"],
         ["🪟 معرض استار ميتال للألوميتال"],
@@ -154,6 +190,10 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text("اختر الخدمة المطلوبة من القائمة:", reply_markup=SERVICES_KEYBOARD)
         return ConversationHandler.END
 
+    if "حالات عاجلة" in text:
+        await update.message.reply_text("اختر الخدمة المطلوبة من القائمة:", reply_markup=URGENT_KEYBOARD)
+        return ConversationHandler.END
+
     if "دليل الأطباء" in text:
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
@@ -162,6 +202,22 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text(TUKTUK_TEXT, parse_mode="Markdown")
         return ConversationHandler.END
         
+    elif "مطاعم" in text:
+        restaurants_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🍕 أبو صلاح", url="https://wa.me/201030666675"),
+             InlineKeyboardButton("🍔 أبو حنين", url="https://wa.me/201009751224")],
+            [InlineKeyboardButton("🍟 Viva Food", url="https://wa.me/201094318213"),
+             InlineKeyboardButton("🥩 مطعم أحمد", url="https://wa.me/201006586263")]
+        ])
+        await update.message.reply_text(RESTAURANTS_TEXT, parse_mode="Markdown", reply_markup=restaurants_markup)
+        return ConversationHandler.END
+
+    elif "ملعب البلاشون" in text or "حجز ملعب" in text:
+        contact_keyboard = [[InlineKeyboardButton("تواصل للحجز عبر واتساب 💬", url="https://wa.me/201020840251")]]
+        contact_markup = InlineKeyboardMarkup(contact_keyboard)
+        await update.message.reply_text(PITCH_TEXT, parse_mode="Markdown", reply_markup=contact_markup)
+        return ConversationHandler.END
+
     elif "استار ميتال" in text:
         contact_keyboard = [[InlineKeyboardButton("تواصل عبر واتساب 💬", url="https://wa.me/201014770786")]]
         contact_markup = InlineKeyboardMarkup(contact_keyboard)
@@ -201,8 +257,8 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         await update.message.reply_text("💼 اكتب تفاصيل الوظيفة (التخصص، المرتب، رقم التواصل):")
         return TYPING_INPUT
 
-    elif "استغاثة" in text:
-        await update.message.reply_text("🚨 اكتب تفاصيل الاستغاثة ورقم التواصل:")
+    elif "طلب مساعدة" in text:
+        await update.message.reply_text("🚨 اكتب تفاصيل طلب المساعدة أو الاستغاثة ورقم التواصل:")
         return TYPING_INPUT
 
     elif "مفقود" in text or "أمانة" in text:
@@ -234,12 +290,13 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         context.user_data.clear()
         return ConversationHandler.END
 
-    KNOWN = ["🚨 إرسال استغاثة / حالة عاجلة", "🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ",
-             "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", "🚕 مشاركة المشاوير والمواصلات",
-             "💼 وظائف خالية", "🛠️ الخدمات", "🩺 دليل الأطباء والعيادات", "🪟 معرض استار ميتال للألوميتال",
+    KNOWN = ["🚨 حالات عاجلة", "🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ",
+             "🤝 طلب مساعدة", "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", 
+             "🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية", "🛠️ الخدمات", 
+             "🩺 دليل الأطباء والعيادات", "🪟 معرض استار ميتال للألوميتال",
              "📦 خدمات الشحن والتوصيل (الطيارين)", "🏠 عقارات وسكن (بيع / إيجار)", "➕ أضف عملك",
              "🛺 اطلب توك توك", "🔙 رجوع للقائمة الرئيسية", 
-             "📦 أبلغ عن مفقود", "🏠 عقارات وسكن", "🚕 مشاركة المشاوير", "🛠 الخدمات"]
+             "📦 أبلغ عن مفقود", "🏠 عقارات وسكن", "🚕 مشاركة المشاوير", "🛠 الخدمات", "🍔 مطاعم", "🏟️ حجز ملعب البلاشون"]
              
     if user_text in KNOWN:
         context.user_data.clear()
@@ -266,9 +323,9 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             action_code = ""
             action_name = ""
             
-            if "استغاثة" in choice:
+            if "طلب مساعدة" in choice:
                 action_code = "sos"
-                action_name = "استغاثة"
+                action_name = "طلب مساعدة / استغاثة"
             elif "وظائف" in choice:
                 action_code = "job"
                 action_name = "وظيفة"
