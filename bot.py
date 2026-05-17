@@ -73,6 +73,13 @@ EMERGENCY_PHARMACY_INFO = (
     "⏰ *الشيفت مستمر حتى الساعة 3 صباحاً*"
 )
 
+EMERGENCY_DOCTOR_TEXT = (
+    "🚨 *د/ عبد الله نبيل (طبيب طوارئ 24 ساعة)*\n\n"
+    "• أرقام التواصل الفوري:\n"
+    "📞 اتصال مباشر: 01130396842\n"
+    "💬 واتساب: 01069431963"
+)
+
 EVENING_AZKAR_TEXT = (
     "أَعُوذُ بِاللهِ مِنْ الشَّيْطَانِ الرَّجِيمِ\n"
     "{اللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاء وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالأَرْضَ وَلاَ يَؤُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ}"
@@ -130,7 +137,7 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
 
 URGENT_KEYBOARD = ReplyKeyboardMarkup(
     [
-        ["🤝 طلب مساعدة"],
+        ["🤝 طلب مساعدة", "🚨 طبيب طوارئ (24 ساعة)"],
         ["🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ"],
         ["🔙 رجوع للقائمة الرئيسية"]
     ],
@@ -253,6 +260,12 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         contact_markup = InlineKeyboardMarkup(contact_keyboard)
         await update.message.reply_text(EMERGENCY_PHARMACY_INFO, parse_mode="Markdown", reply_markup=contact_markup)
         return ConversationHandler.END
+
+    elif "طبيب طوارئ" in text:
+        contact_keyboard = [[InlineKeyboardButton("💬 تواصل طوارئ (واتساب)", url="https://wa.me/201069431963")]]
+        contact_markup = InlineKeyboardMarkup(contact_keyboard)
+        await update.message.reply_text(EMERGENCY_DOCTOR_TEXT, parse_mode="Markdown", reply_markup=contact_markup)
+        return ConversationHandler.END
         
     elif "الشحن والتوصيل" in text:
         await update.message.reply_text(DELIVERY_TEXT, parse_mode="Markdown")
@@ -315,7 +328,7 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
     KNOWN = ["🚨 حالات عاجلة", "🏥 صيدليات الطوارئ الليلة", "🩸 التبرع بالدم والطوارئ",
-             "🤝 طلب مساعدة", "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", 
+             "🤝 طلب مساعدة", "🚨 طبيب طوارئ (24 ساعة)", "📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا", 
              "🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية", "🛠️ الخدمات", 
              "🩺 دليل الأطباء والعيادات", "🪟 معرض استار ميتال للألوميتال",
              "📦 خدمات الشحن والتوصيل (الطيارين)", "🏠 عقارات وسكن (بيع / إيجار)", "➕ أضف عملك",
