@@ -99,7 +99,12 @@ STAR_METAL_TEXT = (
     "📞 *رقم التواصل:* 01014770786"
 )
 
-TUKTUK_TEXT = "⏳ *هذه الميزة ستتوفر قريباً...*"
+TUKTUK_TEXT = (
+    "🛺 *دليل سائقي التوك توك بالبلاشون:*\n\n"
+    "👤 *الطالب:* كريم عماد\n"
+    "• السن: 19 سنة\n"
+    "📞 *رقم التواصل:* 01090305795\n"
+)
 
 RESTAURANTS_TEXT = (
     "🍔 *قائمة المطاعم بالبلاشون:*\n\n"
@@ -235,7 +240,10 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
         
     if "توك توك" in text:
-        await update.message.reply_text(TUKTUK_TEXT, parse_mode="Markdown")
+        tuktuk_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💬 تواصل مع كريم (واتساب)", url="https://wa.me/201090305795")]
+        ])
+        await update.message.reply_text(TUKTUK_TEXT, parse_mode="Markdown", reply_markup=tuktuk_markup)
         return ConversationHandler.END
         
     elif "مطاعم" in text:
