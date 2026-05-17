@@ -54,13 +54,16 @@ DOCTORS_TEXT = (
     "🚨 *طوارئ (24 ساعة):*\n"
     "👨‍⚕️ د. عبد الله نبيل\n"
     "📞 هاتفياً: 01130396842\n"
-    "💬 واتساب: 01069431963\n\n"
-    "🏅 *Coach Badr Frere*\n"
+    "💬 واتساب: 01069431963\n"
+)
+
+DEVELOPER_TEXT = (
+    "🏅 *Captain & Engineer: Badr Frere*\n"
     "----------------------------------------\n"
     "💪 *[الجانب الرياضي والصحي]:*\n"
     "• التخصص: مدرب فيتنس وكوتش تغذية محترف (Professional Nutritionist).\n"
     "• المقر الحالي: أكاديمية جروكسي (Goroxi Academy) - العاشر من رمضان.\n"
-    "• الخدمات: تصميم برامج تدريبية، خطط تغذية علمية وحساب ماكروز (Body Recomposition).\n\n"
+    "• الخدمات: تصميم برامج تدريبية، خطط تغذية علمية وحساب ماكروز للتخسيس أو التضخيم.\n\n"
     "💻 *[الجانب التقني والبرمجي]:*\n"
     "• التخصص: Front-End Developer\n"
     "• الخدمات المتاحة لأصحاب الأعمال والمشاريع:\n"
@@ -140,7 +143,8 @@ MAIN_KEYBOARD = ReplyKeyboardMarkup(
         ["📦 أبلغ عن مفقود / أمانة", "📢 إعلان منتج / خدماتنا"],
         ["🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية"],
         ["🛠️ الخدمات", "🩺 دليل الأطباء والعيادات"],
-        ["➕ أضف عملك", "🛺 اطلب توك توك"]
+        ["➕ أضف عملك", "🛺 اطلب توك توك"],
+        ["💻 مصمم البوت"]
     ],
     resize_keyboard=True,
 )
@@ -233,10 +237,16 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     if "دليل الأطباء" in text:
         doctors_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton("💬 تواصل مع د. خطاب (واتساب)", url="https://wa.me/201022007977")],
-            [InlineKeyboardButton("💬 طوارئ د. عبدالله (واتساب)", url="https://wa.me/201069431963")],
-            [InlineKeyboardButton("💪 تواصل مع Coach Badr (واتساب)", url="https://wa.me/201020549760")]
+            [InlineKeyboardButton("💬 طوارئ د. عبدالله (واتساب)", url="https://wa.me/201069431963")]
         ])
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown", reply_markup=doctors_markup)
+        return ConversationHandler.END
+
+    if "مصمم البوت" in text:
+        developer_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💻 تواصل مع مصمم البوت (واتساب)", url="https://wa.me/201020549760")]
+        ])
+        await update.message.reply_text(DEVELOPER_TEXT, parse_mode="Markdown", reply_markup=developer_markup)
         return ConversationHandler.END
         
     if "توك توك" in text:
@@ -345,7 +355,7 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
              "🚕 مشاركة المشاوير والمواصلات", "💼 وظائف خالية", "🛠️ الخدمات", 
              "🩺 دليل الأطباء والعيادات", "🪟 معرض استار ميتال للألوميتال",
              "📦 خدمات الشحن والتوصيل (الطيارين)", "🏠 عقارات وسكن (بيع / إيجار)", "➕ أضف عملك",
-             "🛺 اطلب توك توك", "🔙 رجوع للقائمة الرئيسية", 
+             "🛺 اطلب توك توك", "💻 مصمم البوت", "🔙 رجوع للقائمة الرئيسية", 
              "📦 أبلغ عن مفقود", "🏠 عقارات وسكن", "🚕 مشاركة المشاوير", "🛠 الخدمات", "🍔 مطاعم", "🏟️ حجز ملعب البلاشون"]
              
     if user_text in KNOWN:
