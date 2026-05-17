@@ -56,7 +56,7 @@ DOCTORS_TEXT = (
     "📞 هاتفياً: 01130396842\n"
     "💬 واتساب: 01069431963\n\n"
     "💪 *جيم ولياقة بدنية:*\n"
-    "🏅 الكابتن: بدر فرير (Badr Frere)\n"
+    "🏅 Coach Badr Frere\n"
     "• التخصص: مدرب فيتنس وكوتش تغذية محترف (Professional Nutritionist)\n"
     "📍 المقر الحالي: أكاديمية جروكسي (Goroxi Academy) - العاشر من رمضان\n"
     "🎯 *الخدمات المتاحة:*\n"
@@ -217,7 +217,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         doctors_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton("💬 تواصل مع د. خطاب (واتساب)", url="https://wa.me/201022007977")],
             [InlineKeyboardButton("💬 طوارئ د. عبدالله (واتساب)", url="https://wa.me/201069431963")],
-            [InlineKeyboardButton("💪 تواصل مع كابتن بدر (واتساب)", url="https://wa.me/201020549760")]
+            [InlineKeyboardButton("💪 تواصل مع Coach Badr (واتساب)", url="https://wa.me/201020549760")]
         ])
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown", reply_markup=doctors_markup)
         return ConversationHandler.END
