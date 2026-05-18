@@ -19,6 +19,10 @@ BOT_TOKEN  = "8692227293:AAFEqO_5EqAm-jTB7GGnfVMlMh8Ru1iwSeM"
 ADMIN_ID   = 5481609181
 CHANNEL_ID = "@AlBalashon_Channel"
 
+# متغيرات لمنع تكرار إرسال الأذكار
+LAST_MORNING_DATE = None
+LAST_EVENING_DATE = None
+
 # ─── مراحل المحادثة ──────────────────────────
 TYPING_INPUT = 1
 
@@ -522,6 +526,12 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await status.edit_text(f"✅ أُرسلت لـ {sent} مستخدم.\n❌ فشل لـ {failed} مستخدم.")
 
 async def send_daily_azkar(context: ContextTypes.DEFAULT_TYPE):
+    global LAST_MORNING_DATE
+    now_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3))).date()
+    if LAST_MORNING_DATE == now_date:
+        return
+    LAST_MORNING_DATE = now_date
+
     azkar_text = (
         "☀️ *أذكار الصباح | بنية فتح الأبواب والبركة* ☀️\n\n"
         "- سبحان الله\n- الحمد لله\n- لا إله إلا الله\n"
@@ -531,6 +541,12 @@ async def send_daily_azkar(context: ContextTypes.DEFAULT_TYPE):
     except Exception: pass
 
 async def send_daily_evening_azkar(context: ContextTypes.DEFAULT_TYPE):
+    global LAST_EVENING_DATE
+    now_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3))).date()
+    if LAST_EVENING_DATE == now_date:
+        return
+    LAST_EVENING_DATE = now_date
+
     try: await context.bot.send_message(CHANNEL_ID, f"🌆 *أذكار المساء*\n\n{EVENING_AZKAR_TEXT}", parse_mode="Markdown")
     except Exception: pass
 
