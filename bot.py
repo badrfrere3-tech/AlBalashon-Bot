@@ -22,6 +22,7 @@ CHANNEL_ID = "@AlBalashon_Channel"
 # متغيرات لمنع تكرار إرسال الأذكار
 LAST_MORNING_DATE = None
 LAST_EVENING_DATE = None
+LAST_FRIDAY_DATE = None
 
 # ─── مراحل المحادثة ──────────────────────────
 TYPING_INPUT = 1
@@ -95,6 +96,18 @@ EMERGENCY_DOCTOR_TEXT = (
 EVENING_AZKAR_TEXT = (
     "أَعُوذُ بِاللهِ مِنْ الشَّيْطَانِ الرَّجِيمِ\n"
     "{اللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاء وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالأَرْضَ وَلاَ يَؤُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ}"
+)
+
+FRIDAY_KAHF_TEXT = (
+    "✨ *لا تنسوا قراءة سورة الكهف* ✨\n"
+    "----------------------------------------\n"
+    "💡 *[من فضائل سورة الكهف]*:\n"
+    "• *نورٌ بين الجمعتين:* قال رسول الله ﷺ: \"من قرأ سورة الكهف في يوم الجمعة، أضاء له من النور ما بين الجمعتين\".\n"
+    "• *عصمة من الفتن:* تقي قاريء أول عشر آيات منها من فتنة الدجّال.\n"
+    "• *طمأنينة وسكينة:* تنزل السكينة والرحمة على قارئها وتملأ بيته بالبركة.\n\n"
+    "نور الله جمعتكم بكل خير وبركة 🤍\n"
+    "----------------------------------------\n"
+    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
 )
 
 DELIVERY_TEXT = "⏳ *هذه الميزة ستتوفر قريباً...*"
@@ -550,6 +563,16 @@ async def send_daily_evening_azkar(context: ContextTypes.DEFAULT_TYPE):
     try: await context.bot.send_message(CHANNEL_ID, f"🌆 *أذكار المساء*\n\n{EVENING_AZKAR_TEXT}", parse_mode="Markdown")
     except Exception: pass
 
+async def send_friday_reminder(context: ContextTypes.DEFAULT_TYPE):
+    global LAST_FRIDAY_DATE
+    now_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3))).date()
+    if LAST_FRIDAY_DATE == now_date:
+        return
+    LAST_FRIDAY_DATE = now_date
+
+    try: await context.bot.send_message(CHANNEL_ID, FRIDAY_KAHF_TEXT, parse_mode="Markdown")
+    except Exception: pass
+
 # ════════════════════════════════════════════
 #  الإعداد والتشغيل
 # ════════════════════════════════════════════
@@ -564,6 +587,9 @@ def main():
     
     t_evening = datetime.time(hour=20, minute=0, tzinfo=tz)
     app.job_queue.run_daily(send_daily_evening_azkar, time=t_evening)
+
+    t_friday = datetime.time(hour=8, minute=0, tzinfo=tz)
+    app.job_queue.run_daily(send_friday_reminder, time=t_friday, days=(4,))
 
     conv_handler = ConversationHandler(
         entry_points=[
