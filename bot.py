@@ -133,11 +133,30 @@ XRAY_LABS_TEXT = (
     "  📅 المواعيد: \n"
     "  - يومياً: من 2:30 ظهراً إلى 10:30 مساءً.\n"
     "  - الجمعة: من 3:00 عصراً إلى 10:00 مساءً.\n"
-    "  📞 أرقام التواصل: 0552801774 - 01025071770 - 01289740450\n\n"
+    "    "  📞 أرقام التواصل: 0552801774 - 01025071770 - 01289740450\n\n    \"  • 🔬 معمل الدكتور: محمد الخولي (للتحاليل الطبية)\\n\"
+    \"    📞 للتواصل: 01001095354\\n\n\""
     "----------------------------------------\n"
     "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
-
+PEDIATRICS_TEXT = (
+    "👶 *[طب الأطفال وحديثي الولادة]*\n"
+    "----------------------------------------\n\n"
+    "• 🩺 الدكتورة: إيمان السيد عفيفي\n"
+    "  💼 التخصص: استشاري طب الأطفال وحديثي الولادة\n"
+    "  📍 العنوان: قرية البلاشون - منزل أ / السيد عفيفي (رحمه الله)\n"
+    "  📞 للتواصل: 01028447728\n\n"
+    "✨ *خدمات العيادة:*\n"
+    "- فحص شامل حديثي الولادة\n"
+    "- صفراء حديثي الولادة\n"
+    "- نزلات البرد وحساسية الصدر\n"
+    "- النزلات المعوية\n"
+    "- اضطرابات النمو والضعف العام وقصر القامة\n"
+    "- التبول اللاإرادي\n"
+    "- الأمراض الجلدية في الأطفال\n"
+    "- ضعف المناعة\n"
+    "----------------------------------------\n"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
+)
 ALFATH_CLINICS_TEXT = (
     "🏛️ *عيادات الفتح التخصصية*\n"
     "----------------------------------------\n\n"
@@ -514,6 +533,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             [InlineKeyboardButton("مخ وأعصاب وجراحة عامة 🧠", callback_data="doc_neuro_surgery")],
             [InlineKeyboardButton("المسالك البولية والجلدية 🩸", callback_data="doc_uro_derma")],
             [InlineKeyboardButton("مراكز الأشعة والتحاليل 🔬", callback_data="doc_xray_labs")],
+            [InlineKeyboardButton("طب الأطفال وحديثي الولادة 👶", callback_data="doc_pediatrics")],
             [InlineKeyboardButton("عيادات الفتح التخصصية 🏛️", callback_data="alfath_clinics")]
         ])
         await update.message.reply_text(DOCTORS_TEXT, parse_mode="Markdown", reply_markup=doctors_markup, disable_web_page_preview=True)
@@ -698,6 +718,14 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                     else: await context.bot.send_message(chat_id=admin_id, text=req, reply_markup=markup)
                 except Exception as e:
                     print(f"Error sending to admin {admin_id}: {e}")
+                    if admin_id == 1049124970:
+                        try:
+                            await context.bot.send_message(
+                                chat_id=5481609181,
+                                text=f"⚠️ خطأ في الإرسال للآدمن الثاني:\n{str(e)}"
+                            )
+                        except Exception:
+                            pass
             
             await update.message.reply_text("تم إرسال طلبك بنجاح إلى الإدارة وسنتواصل معك قريباً. ✅", reply_markup=MAIN_KEYBOARD)
         else:
