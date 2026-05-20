@@ -24,7 +24,7 @@ CHANNEL_ID = "@AlBalashon_Channel"
 # تم استبدال المتغيرات العامة باستخدام context.bot_data لحفظ الحالة
 
 # ─── مراحل المحادثة ──────────────────────────
-TYPING_INPUT = 1
+WAITING_FOR_REQUEST_DETAILS = 1
 
 # ─── نصوص ثابتة (يمكنك تعديلها لاحقاً) ────────
 DOCTORS_TEXT = (
@@ -596,15 +596,23 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     # --- الردود التي تتطلب إدخال بيانات ---
     elif "التبرع بالدم" in text:
         await update.message.reply_text("🩸 اكتب تفاصيل الحالة الحرجة فوراً (مثال: الفصيلة، المستشفى، رقم التواصل):")
-        return TYPING_INPUT
+        return WAITING_FOR_REQUEST_DETAILS
 
     elif "وظائف" in text:
         await update.message.reply_text("💼 اكتب تفاصيل الوظيفة (التخصص، المرتب، رقم التواصل):")
-        return TYPING_INPUT
+        return WAITING_FOR_REQUEST_DETAILS
 
     elif "طلب مساعدة" in text:
         await update.message.reply_text("🚨 اكتب تفاصيل طلب المساعدة أو الاستغاثة ورقم التواصل:")
-        return TYPING_INPUT
+        return WAITING_FOR_REQUEST_DETAILS
+
+    elif "شكاوى" in text or "مقترح" in text:
+        await update.message.reply_text("📝 اكتب تفاصيل شكواك أو مقترحك وسيتم إرسالها للإدارة:")
+        return WAITING_FOR_REQUEST_DETAILS
+
+    elif "مفقودات" in text:
+        await update.message.reply_text("📢 اكتب تفاصيل المفقودات أو الأمانات مع رقم للتواصل:")
+        return WAITING_FOR_REQUEST_DETAILS
 
     elif "self care" in text.lower() or "self care ✨" in text:
         await update.message.reply_text(SELF_CARE_TEXT, parse_mode="Markdown")
@@ -612,7 +620,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         
     elif "مشاوير" in text or "مواصلات" in text:
         await update.message.reply_text("🚕 اكتب تفاصيل مشوارك (سواق ولا راكب، والميعاد):")
-        return TYPING_INPUT
+        return WAITING_FOR_REQUEST_DETAILS
 
     elif "الجمعية الشرعية" in text:
         await update.message.reply_text(CHARITY_TEXT, parse_mode="Markdown")
@@ -643,7 +651,7 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
              "مكتب السعد للمحاسبة والمراجعة ⚖️", "مكتب السعد", "الجمعية الشرعية 🏛️",
              "🛺 اطلب توك توك", "💻 مصمم البوت", "🔙 رجوع للقائمة الرئيسية", 
              "🚕 مشاركة المشاوير", "🛠 الخدمات", "🍔 مطاعم", "🏟️ حجز ملعب البلاشون",
-             "مكتبة الوفاء", "دليل الصنايعية", "الجمعية الشرعية"]
+             "مكتبة الوفاء", "دليل الصنايعية", "الجمعية الشرعية", "شكاوى", "مفقودات"]
              
     if user_text in KNOWN:
         context.user_data.clear()
@@ -661,6 +669,12 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         if "طلب مساعدة" in choice:
             action_code = "sos"
             action_name = "طلب مساعدة / استغاثة"
+        elif "شكاوى" in choice or "مقترح" in choice:
+            action_code = "complaint"
+            action_name = "شكوى / مقترح"
+        elif "مفقودات" in choice:
+            action_code = "lost"
+            action_name = "مفقودات وأمانات"
         elif "وظائف" in choice:
             action_code = "job"
             action_name = "وظيفة"
@@ -676,16 +690,16 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 InlineKeyboardButton("✅ موافقة ونشر", callback_data=f"app_{action_code}_{user.id}"),
                 InlineKeyboardButton("❌ رفض الطلب", callback_data=f"rej_{action_code}_{user.id}")
             ]])
-            req = f"🔔 *طلب نشر ({action_name})*\nمن: {username}\n\nالتفاصيل:\n{user_text}"
+            req = f"🚨 {action_name} جديد\nمن: {username}\n\nالتفاصيل:\n{user_text}"
             
             for admin in ADMINS:
                 try:
-                    if photo_file_id: await context.bot.send_photo(admin, photo_file_id, caption=req, parse_mode="Markdown", reply_markup=markup)
-                    else: await context.bot.send_message(admin, text=req, parse_mode="Markdown", reply_markup=markup)
+                    if photo_file_id: await context.bot.send_photo(admin, photo_file_id, caption=req, reply_markup=markup)
+                    else: await context.bot.send_message(admin, text=req, reply_markup=markup)
                 except Exception as admin_err:
                     logger.warning("فشل الإرسال للآدمن %s: %s", admin, admin_err)
             
-            await update.message.reply_text(f"✅ تم إرسال طلب نشر ({action_name}) للإدارة، وسيتم نشره فور الموافقة عليه.", reply_markup=MAIN_KEYBOARD)
+            await update.message.reply_text("تم إرسال طلبك بنجاح إلى الإدارة وسنتواصل معك قريباً. ✅", reply_markup=MAIN_KEYBOARD)
         else:
             await update.message.reply_text("اختر خدمة من القائمة 👇", reply_markup=MAIN_KEYBOARD)
 
@@ -878,7 +892,7 @@ def main():
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_choice),
         ],
         states={
-            TYPING_INPUT: [MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, process_input)],
+            WAITING_FOR_REQUEST_DETAILS: [MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, process_input)],
         },
         fallbacks=[CommandHandler("start", start)],
         allow_reentry=False,
