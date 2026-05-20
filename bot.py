@@ -244,7 +244,7 @@ DELIVERY_TEXT = (
     "  📍 العنوان: عزبة الشيمي\n"
     "  📞 للتواصل: 01018226726\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\\_services\\_bot"
 )
 
 ALWAFAA_LIBRARY_TEXT = (
@@ -692,12 +692,12 @@ async def process_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             ]])
             req = f"🚨 {action_name} جديد\nمن: {username}\n\nالتفاصيل:\n{user_text}"
             
-            for admin in ADMINS:
+            for admin_id in [5481609181, 1049124970]:
                 try:
-                    if photo_file_id: await context.bot.send_photo(admin, photo_file_id, caption=req, reply_markup=markup)
-                    else: await context.bot.send_message(admin, text=req, reply_markup=markup)
-                except Exception as admin_err:
-                    logger.warning("فشل الإرسال للآدمن %s: %s", admin, admin_err)
+                    if photo_file_id: await context.bot.send_photo(chat_id=admin_id, photo=photo_file_id, caption=req, reply_markup=markup)
+                    else: await context.bot.send_message(chat_id=admin_id, text=req, reply_markup=markup)
+                except Exception as e:
+                    print(f"Error sending to admin {admin_id}: {e}")
             
             await update.message.reply_text("تم إرسال طلبك بنجاح إلى الإدارة وسنتواصل معك قريباً. ✅", reply_markup=MAIN_KEYBOARD)
         else:
