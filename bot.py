@@ -3,6 +3,9 @@ import sqlite3
 import asyncio
 import datetime
 import textwrap
+import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -967,9 +970,29 @@ async def send_daily_evening_azkar(context: ContextTypes.DEFAULT_TYPE):
     except Exception: pass
 
 # ════════════════════════════════════════════
+#  خادم وهمي لمنع Railway من إيقاف البوت
+# ════════════════════════════════════════════
+class DummyHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is running!")
+
+def run_dummy_server():
+    port = int(os.environ.get("PORT", 8080))
+    try:
+        server = HTTPServer(("0.0.0.0", port), DummyHandler)
+        server.serve_forever()
+    except Exception as e:
+        logger.error(f"Dummy server error: {e}")
+
+# ════════════════════════════════════════════
 #  الإعداد والتشغيل
 # ════════════════════════════════════════════
 def main():
+    # بدء الخادم الوهمي في خلفية التطبيق لإرضاء Railway
+    threading.Thread(target=run_dummy_server, daemon=True).start()
+
     init_db()
     persistence = PicklePersistence(filepath="albalashon_state.pickle")
     app = Application.builder().token(BOT_TOKEN).persistence(persistence).build()
