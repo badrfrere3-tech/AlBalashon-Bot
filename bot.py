@@ -35,7 +35,7 @@ DOCTORS_TEXT = (
     "• 👨‍⚕️ د/ عبد الله نبيل الشوبكي (طوارئ 24 ساعة)\n"
     "  📞 هاتفياً: 01130396842 | 💬 واتساب: 01069431963\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 DENTISTRY_TEXT = (
@@ -49,7 +49,7 @@ DENTISTRY_TEXT = (
     "  📅 المواعيد: الأحد، الثلاثاء، والخميس (من 1:00 ظهراً إلى 9:00 مساءً).\n"
     "  📞 رقم الموبايل: 01091339445\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 PHYSIO_NUTRITION_TEXT = (
@@ -64,7 +64,7 @@ PHYSIO_NUTRITION_TEXT = (
     "• 👨‍⚕️ د/ يوسف محمد محمد (أخصائي العلاج الطبيعي - Physiotherapy)\n"
     "  📞 أرقام التواصل: 01004567506 - 01016233543\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 INTERNAL_CARDIO_CHEST_TEXT = (
@@ -76,7 +76,7 @@ INTERNAL_CARDIO_CHEST_TEXT = (
     "• 👨‍⚕️ د/ محمد حسني (القلب والباطنة والصدر)\n"
     "  📞 للتواصل: 01067682611\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 OBSTETRICS_GYNECOLOGY_TEXT = (
@@ -86,7 +86,7 @@ OBSTETRICS_GYNECOLOGY_TEXT = (
     "  📍 العنوان: أعلى صيدلية الدكتور شكري محمد - بجوار مجوهرات حامد محروس.\n"
     "  📅 المواعيد: يومياً بدءاً من الساعة 5:00 مساءً.\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 ENT_TEXT = (
@@ -99,7 +99,7 @@ ENT_TEXT = (
     "  - الأحد، الثلاثاء، والخميس (من 3:00 إلى 5:00 مساءً).\n"
     "  📞 للتواصل: 01022007977\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 NEURO_SURGERY_TEXT = (
@@ -111,7 +111,7 @@ NEURO_SURGERY_TEXT = (
     "• 👨‍⚕️ د/ إسلام جمال هندي (الجراحة العامة)\n"
     "  📅 المواعيد: كل يوم عدا الإثنين (من 5:00 مساءً لـ 10:00 مساءً).\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 UROLOGY_DERMA_TEXT = (
@@ -122,7 +122,7 @@ UROLOGY_DERMA_TEXT = (
     "• 👨‍⚕️ د/ عبد الرحمن (الجلدية)\n"
     "  📍 العنوان: عمارة الأطباء.\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 XRAY_LABS_TEXT = (
@@ -135,7 +135,7 @@ XRAY_LABS_TEXT = (
     "  - الجمعة: من 3:00 عصراً إلى 10:00 مساءً.\n"
     "  📞 أرقام التواصل: 0552801774 - 01025071770 - 01289740450\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 ALFATH_CLINICS_TEXT = (
@@ -162,7 +162,7 @@ ALFATH_CLINICS_TEXT = (
     "  📅 المواعيد: الأحد والجمعة.\n"
     "  ⏰ الوقت: من 5:00 إلى 9:00 مساءً.\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 DEVELOPER_TEXT = (
@@ -200,7 +200,7 @@ EMERGENCY_PHARMACY_INFO = (
     "• د/ كريم السحت: 01206097087\n"
     "• أ/ نبيل عبد السلام: 01062786766\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 EMERGENCY_DOCTOR_TEXT = (
@@ -234,7 +234,7 @@ SELF_CARE_TEXT = (
     "• الخط الأرضي: 2804454\n"
     "• رقم المحمول: 01024559627\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 DELIVERY_TEXT = "⏳ *هذه الميزة ستتوفر قريباً...*"
@@ -261,7 +261,7 @@ ALWAFAA_LIBRARY_TEXT = (
     "📞 *[للتواصل أو إرسال ملفات الطباعة]:*\n"
     "• رقم المحمول: 01099661248\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 SAAD_OFFICE_TEXT = (
@@ -294,7 +294,7 @@ SAAD_OFFICE_TEXT = (
     "• 💬 01067743223 (واتساب فقط)\n"
     "• 📞 01119461438 (اتصال فقط)\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 STAR_METAL_TEXT = (
@@ -315,7 +315,7 @@ WORKERS_TEXT = (
     "🛠️ *دليل الصنايعية بالبلاشون:*\n\n"
     "يرجى اختيار تخصص الصنايعي المطلوب من الأزرار بالأسفل لعرض الأسماء وأرقام التواصل.\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 WOOD_WORKERS_TEXT = (
@@ -328,7 +328,7 @@ WOOD_WORKERS_TEXT = (
     "• 🛠️ السيد موسى\n"
     "  📞 رقم التواصل: 01094143194\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 PAINT_WORKERS_TEXT = (
@@ -337,7 +337,7 @@ PAINT_WORKERS_TEXT = (
     "• 🎨 حسن القربي\n"
     "  📞 رقم التواصل: 01022443024 - 01103624415\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 ELEC_WORKERS_TEXT = (
@@ -350,7 +350,7 @@ ELEC_WORKERS_TEXT = (
     "• ⚡ عمرو القمحاوي\n"
     "  📞 رقم التواصل: 01093100354\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 CERAMIC_WORKERS_TEXT = (
@@ -359,7 +359,7 @@ CERAMIC_WORKERS_TEXT = (
     "• 🧱 محمد قاسم\n"
     "  📞 رقم التواصل: 01093000617\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 RESTAURANTS_TEXT = (
@@ -396,7 +396,7 @@ CHARITY_TEXT = (
     "• ☎️ الخط الأرضي: 0552803988\n"
     "• 📱 أ/ طارق محمود: 01062154844\n\n"
     "----------------------------------------\n"
-    "🤖 للبوت والخدمات: t.me/AlBalashon_services_bot"
+    "🤖 للبوت والخدمات: t.me/AlBalashon\_services\_bot"
 )
 
 # ─── لوحات المفاتيح ──────────────────────────
@@ -767,18 +767,18 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         markup = None
         if action == "sos":
             markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع الحالة 🚨", url=contact_url)]])
-            text_to_send = f"🚨 *استغاثة عاجلة*\n\n{details}\n\n🤖 للتواصل عبر البوت: t.me/AlBalashon_services_bot"
+            text_to_send = f"🚨 *استغاثة عاجلة*\n\n{details}\n\n🤖 للتواصل عبر البوت: t.me/AlBalashon\_services\_bot"
         elif action == "blood":
             markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع حالة الطوارئ 🩸", url=contact_url)]])
-            text_to_send = f"🚨 *نداء طوارئ عاجل - تبرع بالدم* 🚨\n\n{details}\n\n🤖 للتواصل عبر البوت: t.me/AlBalashon_services_bot"
+            text_to_send = f"🚨 *نداء طوارئ عاجل - تبرع بالدم* 🚨\n\n{details}\n\n🤖 للتواصل عبر البوت: t.me/AlBalashon\_services\_bot"
         elif action == "ride":
             markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل مع صاحب المشوار 💬", url=contact_url)]])
-            text_to_send = f"🚕 *إعلان مواصلة فوري*\n\n{details}\n\n🤖 للتواصل عبر البوت: t.me/AlBalashon_services_bot"
+            text_to_send = f"🚕 *إعلان مواصلة فوري*\n\n{details}\n\n🤖 للتواصل عبر البوت: t.me/AlBalashon\_services\_bot"
         elif action == "lost":
             markup = InlineKeyboardMarkup([[InlineKeyboardButton("تواصل للإبلاغ 💬", url=contact_url)]])
-            text_to_send = f"📢 *مفقودات وأمانات*\n\n{details}\n\n🤖 للتواصل عبر البوت: t.me/AlBalashon_services_bot"
+            text_to_send = f"📢 *مفقودات وأمانات*\n\n{details}\n\n🤖 للتواصل عبر البوت: t.me/AlBalashon\_services\_bot"
         elif action == "job":
-            text_to_send = f"💼 *وظائف خالية*\n\n{details}\n\n🤖 للتواصل عبر البوت: t.me/AlBalashon_services_bot"
+            text_to_send = f"💼 *وظائف خالية*\n\n{details}\n\n🤖 للتواصل عبر البوت: t.me/AlBalashon\_services\_bot"
         else:
             return
 
@@ -802,12 +802,12 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 #  أوامر الأدمن والأذكار المجدولة
 # ════════════════════════════════════════════
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if update.effective_user.id != ADMIN_ID: return
+    if update.effective_user.id not in ADMINS: return
     count = get_user_count()
     await update.message.reply_text(f"📊 عدد المشتركين في البوت حالياً: {count} شخص.")
 
 async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if update.effective_user.id != ADMIN_ID: return
+    if update.effective_user.id not in ADMINS: return
     if not context.args: return await update.message.reply_text("⚠️ اكتب الرسالة بعد الأمر:\n/broadcast نص الرسالة")
     
     msg = " ".join(context.args)
