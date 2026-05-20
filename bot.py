@@ -17,7 +17,7 @@ from telegram.ext import (
 # ─── الإعدادات ───────────────────────────────
 BOT_TOKEN  = "8692227293:AAFEqO_5EqAm-jTB7GGnfVMlMh8Ru1iwSeM"
 ADMIN_ID   = 5481609181
-ADMIN_ID_2 = 201028949164
+ADMIN_ID_2 = 1049124970
 ADMINS     = [ADMIN_ID, ADMIN_ID_2]  # قائمة جميع الآدمنز لتوجيه الطلبات
 CHANNEL_ID = "@AlBalashon_Channel"
 
